@@ -45,7 +45,7 @@ public class ShiroConfig {
     }
 
     @Bean
-    public ShiroRealmService ShiroRealmService(VerificationCodeCheckService verificationCodeCheckService) {
+    public ShiroRealmService myShiroRealmService(VerificationCodeCheckService verificationCodeCheckService) {
         return new ShiroRealmService(verificationCodeCheckService);
     }
 

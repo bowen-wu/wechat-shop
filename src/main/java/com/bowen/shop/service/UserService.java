@@ -3,6 +3,7 @@ package com.bowen.shop.service;
 import com.bowen.shop.generate.User;
 import com.bowen.shop.generate.UserExample;
 import com.bowen.shop.generate.UserMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public UserService(UserMapper userMapper) {
         this.userMapper = userMapper;
     }

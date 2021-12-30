@@ -1,5 +1,6 @@
 package com.bowen.shop.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -15,6 +16,7 @@ public class ShiroRealmService extends AuthorizingRealm {
     private final VerificationCodeCheckService verificationCodeCheckService;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public ShiroRealmService(VerificationCodeCheckService verificationCodeCheckService) {
         this.verificationCodeCheckService = verificationCodeCheckService;
         this.setCredentialsMatcher((authenticationToken, authenticationInfo) -> new String((char[]) authenticationToken.getCredentials()).equals(authenticationInfo.getCredentials()));

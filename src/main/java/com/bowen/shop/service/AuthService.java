@@ -1,5 +1,6 @@
 package com.bowen.shop.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ public class AuthService {
     private final SmsCodeService smsCodeService;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public AuthService(UserService userService,
                        VerificationCodeCheckService verificationCodeCheckService,
                        SmsCodeService smsCodeService) {
