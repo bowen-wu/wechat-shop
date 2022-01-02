@@ -3,6 +3,9 @@ package com.bowen.shop.entity;
 public class Tel {
     private String tel;
 
+    public Tel() {
+    }
+
     public Tel(String tel) {
         this.tel = tel;
     }

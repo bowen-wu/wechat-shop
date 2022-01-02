@@ -8,10 +8,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class TelVerificationServiceTest {
+public class TelVerificationServiceTest {
     private static final Tel EMPTY_TEL = new Tel(null);
-    private static final Tel VALID_PARAMETER = new Tel("13012341234");
-    private static final Tel INVALID_PARAMETER = new Tel("1301234123");
+    public static final Tel VALID_PARAMETER = new Tel("13012341234");
+    public static final Tel INVALID_PARAMETER = new Tel("1301234123");
 
     @Test
     public void returnFalseIfInvalid() {
