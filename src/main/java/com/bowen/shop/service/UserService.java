@@ -34,4 +34,10 @@ public class UserService {
         }
         return user;
     }
+
+    public User getUserInfoByTel(String tel) {
+        UserExample userExample = new UserExample();
+        userExample.createCriteria().andTelEqualTo(tel);
+        return userMapper.selectByExample(userExample).get(0);
+    }
 }
