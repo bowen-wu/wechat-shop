@@ -6,7 +6,7 @@ import com.bowen.shop.entity.TelAndCode;
 import com.bowen.shop.generate.User;
 import com.bowen.shop.service.AuthService;
 import com.bowen.shop.service.TelVerificationService;
-import com.bowen.shop.service.UserService;
+import com.bowen.shop.service.UserContext;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -24,13 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/api/v1")
 public class AuthController {
     private final AuthService authService;
-    private final UserService userService;
     private final TelVerificationService telVerificationService;
 
     @Autowired
-    public AuthController(AuthService authService, UserService userService, TelVerificationService telVerificationService) {
+    public AuthController(AuthService authService, TelVerificationService telVerificationService) {
         this.authService = authService;
-        this.userService = userService;
         this.telVerificationService = telVerificationService;
     }
 
@@ -69,11 +67,10 @@ public class AuthController {
 
     @GetMapping("/status")
     public LoginResponse getLoginStatus() {
-        String tel = (String) SecurityUtils.getSubject().getPrincipal();
-        if (tel == null) {
+        User currentUser = UserContext.getCurrentUser();
+        if (currentUser == null) {
             return LoginResponse.notLogin();
         }
-        User loginUser = userService.getUserInfoByTel(tel);
-        return LoginResponse.alreadyLogin(loginUser);
+        return LoginResponse.alreadyLogin(currentUser);
     }
 }

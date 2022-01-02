@@ -9,6 +9,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -35,9 +36,9 @@ public class UserService {
         return user;
     }
 
-    public User getUserInfoByTel(String tel) {
+    public Optional<User> getUserInfoByTel(String tel) {
         UserExample userExample = new UserExample();
         userExample.createCriteria().andTelEqualTo(tel);
-        return userMapper.selectByExample(userExample).get(0);
+        return Optional.ofNullable(userMapper.selectByExample(userExample).get(0));
     }
 }

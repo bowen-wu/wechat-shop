@@ -1,6 +1,8 @@
 package com.bowen.shop.config;
 
 import com.bowen.shop.service.ShiroRealmService;
+import com.bowen.shop.service.UserLoginInterceptor;
+import com.bowen.shop.service.UserService;
 import com.bowen.shop.service.VerificationCodeCheckService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
@@ -13,15 +15,25 @@ import org.apache.shiro.spring.web.config.ShiroFilterChainDefinition;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class ShiroConfig {
+public class ShiroConfig implements WebMvcConfigurer {
+    private final UserService userService;
+
+    @Autowired
+    public ShiroConfig(UserService userService) {
+        this.userService = userService;
+    }
+
     @Bean
     public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
@@ -47,6 +59,11 @@ public class ShiroConfig {
     @Bean
     public ShiroRealmService myShiroRealmService(VerificationCodeCheckService verificationCodeCheckService) {
         return new ShiroRealmService(verificationCodeCheckService);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new UserLoginInterceptor(userService));
     }
 
     // TODO: shiro example

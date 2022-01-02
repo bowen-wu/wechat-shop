@@ -122,7 +122,6 @@ public class AuthIntegrationTest {
         }
     }
 
-
     public void testUserInfoWhenNotLogin(CloseableHttpClient httpclient) throws Exception {
         ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status").build();
         try (CloseableHttpResponse response = httpclient.execute(loginInfo)) {
