@@ -24,7 +24,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
@@ -46,12 +45,7 @@ public class AuthIntegrationTest {
     @Test
     public void returnHttpOKWhenParameterIsCorrect() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
-            final ClassicHttpRequest sendSmsCode = ClassicRequestBuilder.post()
-                    .setUri(new URI(getUrl("/api/v1/code")))
-                    .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .addHeader("accept", MediaType.APPLICATION_JSON_VALUE)
-                    .setEntity(objectMapper.writeValueAsString(TelVerificationServiceTest.VALID_PARAMETER))
-                    .build();
+            final ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_OK, response.getCode());
             }
@@ -61,12 +55,7 @@ public class AuthIntegrationTest {
     @Test
     public void returnHttpBadRequestWhenParameterIsCorrect() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
-            final ClassicHttpRequest sendSmsCode = ClassicRequestBuilder.post()
-                    .setUri(new URI(getUrl("/api/v1/code")))
-                    .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .addHeader("accept", MediaType.APPLICATION_JSON_VALUE)
-                    .setEntity(objectMapper.writeValueAsString(TelVerificationServiceTest.INVALID_PARAMETER))
-                    .build();
+            final ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.INVALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_BAD_REQUEST, response.getCode());
             }
@@ -83,17 +72,16 @@ public class AuthIntegrationTest {
             testUserInfoWhenNotLogin(httpclient);
 
             // 1. send sms code
-            ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code")
-                    .setEntity(objectMapper.writeValueAsString(TelVerificationServiceTest.VALID_PARAMETER))
-                    .build();
+            ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_OK, response.getCode());
             }
 
             // 2. login => cookie
-            ClassicHttpRequest login = createRequestBuilder(Method.POST, "/api/v1/login")
-                    .setEntity(objectMapper.writeValueAsString(new TelAndCode(TelVerificationServiceTest.VALID_PARAMETER.getTel(), "000000")))
-                    .build();
+            ClassicHttpRequest login = createRequestBuilder(
+                    Method.POST,
+                    "/api/v1/login",
+                    new TelAndCode(TelVerificationServiceTest.VALID_PARAMETER.getTel(), "000000"));
             try (CloseableHttpResponse response = httpclient.execute(login)) {
                 assertEquals(HTTP_MOVED_TEMP, response.getCode());
             }
@@ -102,7 +90,7 @@ public class AuthIntegrationTest {
             testUserInfoWhenLogged(httpclient);
 
             // 4. logout
-            ClassicHttpRequest logout = createRequestBuilder(Method.POST, "/api/v1/logout").build();
+            ClassicHttpRequest logout = createRequestBuilder(Method.POST, "/api/v1/logout", null);
             try (CloseableHttpResponse response = httpclient.execute(logout)) {
                 assertEquals(HTTP_OK, response.getCode());
             }
@@ -113,7 +101,7 @@ public class AuthIntegrationTest {
     }
 
     public void testUserInfoWhenLogged(CloseableHttpClient httpclient) throws Exception {
-        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status").build();
+        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status", null);
         try (CloseableHttpResponse response = httpclient.execute(loginInfo)) {
             assertEquals(HTTP_OK, response.getCode());
             LoginResponse loginResponse = objectMapper.readValue(EntityUtils.toString(response.getEntity()), LoginResponse.class);
@@ -123,7 +111,7 @@ public class AuthIntegrationTest {
     }
 
     public void testUserInfoWhenNotLogin(CloseableHttpClient httpclient) throws Exception {
-        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status").build();
+        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status", null);
         try (CloseableHttpResponse response = httpclient.execute(loginInfo)) {
             assertEquals(HTTP_OK, response.getCode());
             LoginResponse loginResponse = objectMapper.readValue(EntityUtils.toString(response.getEntity()), LoginResponse.class);
@@ -136,10 +124,14 @@ public class AuthIntegrationTest {
         return "http://localhost:" + environment.getProperty("local.server.port") + apiName;
     }
 
-    private ClassicRequestBuilder createRequestBuilder(Method method, String apiName) throws URISyntaxException {
-        return ClassicRequestBuilder.create(String.valueOf(method))
+    private ClassicHttpRequest createRequestBuilder(Method method, String apiName, Object body) throws Exception {
+        ClassicRequestBuilder accept = ClassicRequestBuilder.create(String.valueOf(method))
                 .setUri(new URI(getUrl(apiName)))
                 .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("accept", MediaType.APPLICATION_JSON_VALUE);
+        if (body != null) {
+            accept.setEntity(objectMapper.writeValueAsString(body));
+        }
+        return accept.build();
     }
 }
