@@ -32,9 +32,26 @@
         <table schema="shop" tableName="USER" domainObjectName="User">
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
-            <columnOverride column="AVATAR_URL" property="avatarUrl"/>
-            <columnOverride column="CREATED_AT" property="createdAt"/>
-            <columnOverride column="UPDATED_AT" property="updatedAt"/>
+        </table>
+
+        <table schema="shop" tableName="SHOP" domainObjectName="Shop">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table schema="shop" tableName="GOODS" domainObjectName="Goods">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table schema="shop" tableName="ORDER" domainObjectName="Order">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table schema="shop" tableName="ORDER_GOODS" domainObjectName="OrderGoods">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
         </table>
     </context>
 </generatorConfiguration>

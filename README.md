@@ -48,18 +48,18 @@
 - updatedAt 更新时间
 
 ### 订单商品关系表 ORDER_GOODS
+
 - id
 - goodsId 商品ID
 - number 商品数量
 
 ### 购物车表 SHOPPING_CART
+
 // TODO
 
 ## TODO
 
 1. apidoc => 接口文档
-2. migration => create database table
-3. mybatis generator
 
 
 

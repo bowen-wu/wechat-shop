@@ -1,0 +1,6 @@
+create table `ORDER_GOODS`
+(
+    ID       BIGINT PRIMARY KEY AUTO_INCREMENT,
+    GOODS_ID BIGINT,
+    NUMBER   BIGINT
+)
