@@ -32,6 +32,34 @@ public class AuthController {
         this.telVerificationService = telVerificationService;
     }
 
+    // @formatter:off
+    /**
+     * @api {post} /code 请求验证码
+     * @apiName GetCode
+     * @apiGroup 登录与鉴权
+     *
+     * @apiParam {String} tel 手机号码
+     * @apiParamExample {json} Request-Example:
+     *          {
+     *              "tel": "13800001234"
+     *          }
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     * @apiError 400 Bad Request 若用户请求包含错误
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 400 Bad Request
+     *      {
+     *          "message": "Bad Request"
+     *      }
+     */
+    /**
+     * 发送验证码
+     *
+     * @param tel 手机号
+     */
+    // @formatter:on
     @PostMapping("/code")
     public void code(@RequestBody Tel tel, HttpServletResponse response) {
         if (telVerificationService.verifyTelParameter(tel)) {
@@ -41,6 +69,35 @@ public class AuthController {
         }
     }
 
+    /**
+     * @api {post} /login 登录
+     * @apiName Login
+     * @apiGroup 登录与鉴权
+     *
+     * @apiParam {String} tel 手机号码
+     * @apiParam {String} code 验证码
+     * @apiParamExample {json} Request-Example:
+     *      {
+     *          "tel": "13700001234",
+     *          "code": "000000"
+     *      }
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     * @apiError 400 Bad Request 若用户请求包含错误
+     * @apiError 403 Forbidden 若用户的验证码错误
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 400 Bad Request
+     *      {
+     *          "message": "Bad Request"
+     *      }
+     */
+    /**
+     * 登录
+     *
+     * @param telAndCode 手机号和验证码
+     */
     @PostMapping("/login")
     public void login(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
         if (telVerificationService.verifyTelParameter(telAndCode)) {
@@ -60,11 +117,57 @@ public class AuthController {
         }
     }
 
+    /**
+     * @api {post} /logout 登出
+     * @apiName Logout
+     * @apiGroup 登录与鉴权
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *
+     * @apiError 401 Unauthorized 若用户未登录
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 400 Bad Request
+     *      {
+     *          "message": "Bad Request"
+     *      }
+     */
+    /**
+     * 登出
+     */
     @PostMapping("/logout")
     public void logout() {
         SecurityUtils.getSubject().logout();
     }
 
+    /**
+     * @api {get} /status 获取登录状态
+     * @apiName Status
+     * @apiGroup 登录与鉴权
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *          "login": true,
+     *          "user": {
+     *              "id": 123,
+     *              "name": "张三",
+     *              "tel": "13700001234",
+     *              "avatarUrl": "http://url",
+     *          }
+     *      }
+     *
+     * @apiError 401 Unauthorized 若用户未登录
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 400 Bad Request
+     *      {
+     *          "message": "Bad Request"
+     *      }
+     */
+    /**
+     * 获取登录状态
+     *
+     * @return 登录
+     */
     @GetMapping("/status")
     public LoginResponse getLoginStatus() {
         User currentUser = UserContext.getCurrentUser();
