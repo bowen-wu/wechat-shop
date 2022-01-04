@@ -19,11 +19,15 @@ public class UserLoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String tel = (String) SecurityUtils.getSubject().getPrincipal();
+        /**
+         * TODO: 如果没有登录直接返回 401，登录了之后可以继续，还需要添加白名单，如登录接口不需要判断是否登录
+         */
+        Object tel = SecurityUtils.getSubject().getPrincipal();
         if (tel != null) {
-            userService.getUserInfoByTel(tel).ifPresent(UserContext::setCurrentUser);
+            userService.getUserInfoByTel((String) tel).ifPresent(UserContext::setCurrentUser);
         }
         return true;
+//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Override
@@ -32,6 +36,4 @@ public class UserLoginInterceptor implements HandlerInterceptor {
         // 非常非常重要，线程会被复用
         UserContext.setCurrentUser(null);
     }
-
-
 }

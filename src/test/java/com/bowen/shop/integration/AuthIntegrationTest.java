@@ -28,6 +28,7 @@ import java.net.URI;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,6 +42,15 @@ public class AuthIntegrationTest {
     Environment environment;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public void return401WhenAccessDenied() throws Exception {
+        try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
+            final ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/any", TelVerificationServiceTest.VALID_PARAMETER);
+            try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
+                assertEquals(HTTP_UNAUTHORIZED, response.getCode());
+            }
+        }
+    }
 
     @Test
     public void returnHttpOKWhenParameterIsCorrect() throws Exception {
