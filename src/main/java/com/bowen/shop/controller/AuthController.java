@@ -57,7 +57,8 @@ public class AuthController {
     /**
      * 发送验证码
      *
-     * @param tel 手机号
+     * @param tel      手机号
+     * @param response response
      */
     // @formatter:on
     @PostMapping("/code")
@@ -97,6 +98,7 @@ public class AuthController {
      * 登录
      *
      * @param telAndCode 手机号和验证码
+     * @param response   response
      */
     @PostMapping("/login")
     public void login(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
