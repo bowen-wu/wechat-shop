@@ -1,16 +1,33 @@
 package com.bowen.shop.controller;
 
+import com.bowen.shop.entity.HttpException;
+import com.bowen.shop.entity.Response;
+import com.bowen.shop.generate.Goods;
+import com.bowen.shop.service.GoodsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/v1")
 public class GoodsController {
+    private final GoodsService goodsService;
+
+    @Autowired
+    public GoodsController(GoodsService goodsService) {
+        this.goodsService = goodsService;
+    }
+
     /**
      * @api {post} /goods 创建商品
      * @apiName CreateGoods
@@ -18,13 +35,13 @@ public class GoodsController {
      *
      * @apiParamExample {json} Request-Example:
      *          {
-     *              "name": "肥皂",
+     *              "name": "肥皂",  // required
      *              "description": "纯天然无污染肥皂",
      *              "details": "这是一块好肥皂",
      *              "imgUrl": "https://img.url",
-     *              "price": 500,
+     *              "price": 500, // required
      *              "stock": 10,
-     *              "shopId": 12345
+     *              "shopId": 12345 // required
      *          }
      *
      * @apiSuccess {Goods} data 创建的商品
@@ -47,6 +64,7 @@ public class GoodsController {
      * @apiError 400 Bad Request 若用户请求包含错误
      * @apiError 401 Unauthorized 若用户未登录
      * @apiError 403 Forbidden 若用户尝试创建非自己管理店铺的商品
+     * @apiError 404 Not Found 若店铺不存在
      *
      * @apiErrorExample Error-Response:
      *      HTTP/1.1 400 Bad Request
@@ -56,9 +74,35 @@ public class GoodsController {
      */
     /**
      * 创建商品
+     *
+     * @param goods    创建的商品
+     * @param response response
+     * @return 新创建的商品
      */
     @PostMapping("/goods")
-    public void createGoods() {
+    public Response<Goods> createGoods(@RequestBody Goods goods, HttpServletResponse response) {
+        if (goods.getName() == null || goods.getPrice() == null || goods.getShopId() == null) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return null;
+        }
+        clean(goods);
+        response.setStatus(HttpStatus.CREATED.value());
+        try {
+            return Response.of(goodsService.createGoods(goods));
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return null;
+        }
+    }
+
+    public Goods clean(Goods goods) {
+        goods.setId(null);
+        goods.setUpdatedAt(new Date());
+        goods.setCreatedAt(new Date());
+        if (goods.getStock() == null) {
+            goods.setStock(0);
+        }
+        return goods;
     }
 
     /**

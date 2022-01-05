@@ -37,6 +37,9 @@ public class UserService {
     }
 
     public Optional<User> getUserInfoByTel(String tel) {
+        if (tel == null) {
+            return Optional.empty();
+        }
         UserExample userExample = new UserExample();
         userExample.createCriteria().andTelEqualTo(tel);
         return Optional.ofNullable(userMapper.selectByExample(userExample).get(0));
