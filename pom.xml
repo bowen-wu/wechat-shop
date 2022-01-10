@@ -292,6 +292,20 @@
                     <user>root</user>
                     <password>my-secret-pw</password>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>test-database-setup</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>migrate</goal>
+                        </goals>
+                        <configuration>
+                            <url>jdbc:mysql://localhost:3307/shop</url>
+                            <user>root</user>
+                            <password>my-secret-pw</password>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

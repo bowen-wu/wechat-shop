@@ -1,9 +1,12 @@
 package com.bowen.shop.controller;
 
+import com.bowen.shop.entity.GoodsPages;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.Response;
+import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.service.GoodsService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -24,8 +28,19 @@ public class GoodsController {
     private final GoodsService goodsService;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public GoodsController(GoodsService goodsService) {
         this.goodsService = goodsService;
+    }
+
+    public Goods clean(Goods goods) {
+        goods.setId(null);
+        goods.setUpdatedAt(new Date());
+        goods.setCreatedAt(new Date());
+        if (goods.getStock() == null) {
+            goods.setStock(0);
+        }
+        return goods;
     }
 
     /**
@@ -83,26 +98,16 @@ public class GoodsController {
     public Response<Goods> createGoods(@RequestBody Goods goods, HttpServletResponse response) {
         if (goods.getName() == null || goods.getPrice() == null || goods.getShopId() == null) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
-            return null;
+            return Response.fail("请检查参数！");
         }
         clean(goods);
         response.setStatus(HttpStatus.CREATED.value());
         try {
-            return Response.of(goodsService.createGoods(goods));
+            return Response.success(goodsService.createGoods(goods));
         } catch (HttpException exception) {
             response.setStatus(exception.getStatusCode());
-            return null;
+            return Response.fail(exception.getMessage());
         }
-    }
-
-    public Goods clean(Goods goods) {
-        goods.setId(null);
-        goods.setUpdatedAt(new Date());
-        goods.setCreatedAt(new Date());
-        if (goods.getStock() == null) {
-            goods.setStock(0);
-        }
-        return goods;
     }
 
     /**
@@ -128,28 +133,37 @@ public class GoodsController {
      *              "updatedAt": "2020-03-22T13:22:03Z"
      *          }
      *      }
-     * @apiError 400 Bad Request 若用户请求包含错误
      * @apiError 401 Unauthorized 若用户未登录
-     * @apiError 403 Forbidden 若用户尝试创建非自己管理店铺的商品
+     * @apiError 403 Forbidden 若用户尝试删除非自己店铺的商品
      * @apiError 404 Not Found 若商品未找到
      *
      * @apiErrorExample Error-Response:
-     *      HTTP/1.1 400 Bad Request
+     *      HTTP/1.1 403 Forbidden
      *      {
-     *          "message": "Bad Request"
+     *          "message": "Forbidden"
      *      }
      */
     /**
      * 删除商品
      *
-     * @param goodsId 待删除商品 ID
+     * @param goodsId  待删除商品 ID
+     * @param response response
+     * @return 删除的商品
      */
     @DeleteMapping("/goods/{goodsId}")
-    public void deleteGoods(@PathVariable("goodsId") String goodsId) {
+    public Response<Goods> deleteGoods(@PathVariable("goodsId") long goodsId, HttpServletResponse response) {
+        try {
+            response.setStatus(HttpStatus.NO_CONTENT.value());
+            Goods goods = goodsService.deleteGoods(goodsId);
+            return Response.success(goods);
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return Response.fail(exception.getMessage());
+        }
     }
 
     /**
-     * @api {patch} /goods/:id 更新商品
+     * @api {patch} /goods 更新商品
      * @apiName updateGoods
      * @apiGroup Goods
      *
@@ -166,7 +180,7 @@ public class GoodsController {
      *
      * @apiSuccess {Goods} data 更新的商品
      * @apiSuccessExample Success-Response:
-     *      HTTP/1.1 201 Created
+     *      HTTP/1.1 200 OK
      *      {
      *          "data": {
      *              "id": 12345,
@@ -183,7 +197,7 @@ public class GoodsController {
      *      }
      * @apiError 400 Bad Request 若用户请求包含错误
      * @apiError 401 Unauthorized 若用户未登录
-     * @apiError 403 Forbidden 若用户尝试创建非自己管理店铺的商品
+     * @apiError 403 Forbidden 若用户尝试更改非自己管理店铺的商品
      *
      * @apiErrorExample Error-Response:
      *      HTTP/1.1 400 Bad Request
@@ -194,10 +208,20 @@ public class GoodsController {
     /**
      * 更新商品
      *
-     * @param goodsId 待更新的商品ID
+     * @param goods    更新商品的信息
+     * @param response response
+     * @return 更新后的商品
      */
-    @PatchMapping("/goods/{goodsId}")
-    public void updateGoods(@PathVariable("goodsId") String goodsId) {
+    @PatchMapping("/goods")
+    public Response<Goods> updateGoods(@RequestBody Goods goods, HttpServletResponse response) {
+        try {
+            response.setStatus(HttpStatus.OK.value());
+            Goods updatedGoods = goodsService.updateGoods(goods);
+            return Response.success(updatedGoods);
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return Response.fail(exception.getMessage());
+        }
     }
 
     /**
@@ -236,10 +260,20 @@ public class GoodsController {
     /**
      * 根据商品 id 获取商品信息
      *
-     * @param goodsId 商品 id
+     * @param goodsId  商品 id
+     * @param response response
+     * @return 商品
      */
     @GetMapping("/goods/{goodsId}")
-    public void getGoodsByGoodsId(@PathVariable("goodsId") String goodsId) {
+    public Response<Goods> getGoodsByGoodsId(@PathVariable("goodsId") long goodsId, HttpServletResponse response) {
+        try {
+            response.setStatus(HttpStatus.OK.value());
+            Goods updatedGoods = goodsService.getGoodsById(goodsId);
+            return Response.success(updatedGoods);
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return Response.fail(exception.getMessage());
+        }
     }
 
     /**
@@ -291,8 +325,14 @@ public class GoodsController {
      */
     /**
      * 分页获取商品列表
+     *
+     * @param goodsPages goodsPage
+     * @param response   response
+     * @return 商品列表
      */
     @GetMapping("/goods")
-    public void getGoodsList() {
+    public ResponseWithPages<List<Goods>> getGoodsList(@RequestBody GoodsPages goodsPages, HttpServletResponse response) {
+        response.setStatus(HttpStatus.OK.value());
+        return goodsService.getGoodsWithPage(goodsPages);
     }
 }
