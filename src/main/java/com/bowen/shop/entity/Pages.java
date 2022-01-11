@@ -1,8 +1,11 @@
 package com.bowen.shop.entity;
 
 public class Pages {
-    private final int pageNum;
-    private final int pageSize;
+    private int pageNum;
+    private int pageSize;
+
+    public Pages() {
+    }
 
     public Pages(int pageNum, int pageSize) {
         this.pageNum = pageNum;

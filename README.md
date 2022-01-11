@@ -62,4 +62,7 @@
 1. apidoc => 接口文档
 
 
+## 知识点
+1. ` insert ` 之后自动设置了 entity 的 id
+
 

@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,19 +87,28 @@ class GoodsServiceTest {
         Shop testShop = new Shop();
         testShop.setOwnerUserId(3L);
         when(shopMapper.selectByPrimaryKey(1L)).thenReturn(testShop);
-        when(goodsMapper.insert(testGoods)).thenReturn(1);
 
         Goods goods = goodsService.createGoods(testGoods);
         assertEquals(DataStatus.OK.getStatus(), goods.getStatus());
-        assertEquals(1, goods.getId());
     }
 
     @Test
     public void returnNotFoundWhenDeleteGoods() {
         long testGoodsId = 1L;
-        when(goodsMapper.selectByExample(any())).thenReturn(Collections.emptyList());
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
+            goodsService.deleteGoods(testGoodsId);
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
+        assertEquals("商品不存在！", httpException.getMessage());
+
+        Goods testGoods = new Goods();
+        testGoods.setStatus(DataStatus.FAIL.getStatus());
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+
+        httpException = assertThrows(HttpException.class, () -> {
             goodsService.deleteGoods(testGoodsId);
         });
 
@@ -116,9 +124,7 @@ class GoodsServiceTest {
         testGoods.setShopId(testShopId);
         Shop testShop = new Shop();
         testShop.setOwnerUserId(2L);
-        List<Goods> testGoodsList = new ArrayList<>();
-        testGoodsList.add(testGoods);
-        when(goodsMapper.selectByExample(any())).thenReturn(testGoodsList);
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
@@ -137,9 +143,7 @@ class GoodsServiceTest {
         testGoods.setShopId(testShopId);
         Shop testShop = new Shop();
         testShop.setOwnerUserId(3L);
-        List<Goods> testGoodsList = new ArrayList<>();
-        testGoodsList.add(testGoods);
-        when(goodsMapper.selectByExample(any())).thenReturn(testGoodsList);
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         Goods goods = goodsService.deleteGoods(testGoodsId);
@@ -151,9 +155,19 @@ class GoodsServiceTest {
     public void returnNotFoundWhenUpdateGoods() {
         Goods testGoods = new Goods();
         testGoods.setId(1L);
-        when(goodsMapper.selectByExample(any())).thenReturn(Collections.emptyList());
+        when(goodsMapper.selectByPrimaryKey(any())).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
+            goodsService.updateGoods(testGoods);
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
+        assertEquals("商品不存在！", httpException.getMessage());
+
+        testGoods.setStatus(DataStatus.FAIL.getStatus());
+        when(goodsMapper.selectByPrimaryKey(any())).thenReturn(testGoods);
+
+        httpException = assertThrows(HttpException.class, () -> {
             goodsService.updateGoods(testGoods);
         });
 
@@ -174,9 +188,7 @@ class GoodsServiceTest {
         Shop testShop = new Shop();
         testShop.setOwnerUserId(2L);
 
-        List<Goods> testGoodsList = new ArrayList<>();
-        testGoodsList.add(testGoods);
-        when(goodsMapper.selectByExample(any())).thenReturn(testGoodsList);
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
@@ -199,9 +211,7 @@ class GoodsServiceTest {
         Shop testShop = new Shop();
         testShop.setOwnerUserId(3L);
 
-        List<Goods> testGoodsList = new ArrayList<>();
-        testGoodsList.add(testGoods);
-        when(goodsMapper.selectByExample(any())).thenReturn(testGoodsList);
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         Goods goods = goodsService.updateGoods(testGoods);
@@ -213,9 +223,20 @@ class GoodsServiceTest {
     @Test
     public void returnNotFoundWhenGetGoodsById() {
         long testGoodsId = 1L;
-        when(goodsMapper.selectByExample(any())).thenReturn(Collections.emptyList());
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
+            goodsService.getGoodsById(testGoodsId);
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
+        assertEquals("商品不存在！", httpException.getMessage());
+
+        Goods testGoods = new Goods();
+        testGoods.setStatus(DataStatus.FAIL.getStatus());
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+
+        httpException = assertThrows(HttpException.class, () -> {
             goodsService.getGoodsById(testGoodsId);
         });
 
@@ -228,9 +249,7 @@ class GoodsServiceTest {
         long testGoodsId = 1L;
         Goods testGoods = new Goods();
         testGoods.setId(testGoodsId);
-        List<Goods> testGoodsList = new ArrayList<>();
-        testGoodsList.add(testGoods);
-        when(goodsMapper.selectByExample(any())).thenReturn(testGoodsList);
+        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
 
         Goods goods = goodsService.getGoodsById(testGoodsId);
 

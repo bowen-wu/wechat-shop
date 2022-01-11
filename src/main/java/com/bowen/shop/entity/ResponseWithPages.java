@@ -1,8 +1,12 @@
 package com.bowen.shop.entity;
 
 public class ResponseWithPages<T> extends Pages {
-    private final int totalPage;
-    private final T data;
+    private int totalPage;
+    private T data;
+
+    public ResponseWithPages() {
+        super();
+    }
 
     public ResponseWithPages(int pageNum, int pageSize, int totalPage, T data) {
         super(pageNum, pageSize);

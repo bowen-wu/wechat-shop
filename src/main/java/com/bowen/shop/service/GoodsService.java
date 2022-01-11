@@ -41,19 +41,15 @@ public class GoodsService {
         }
 
         goods.setStatus(DataStatus.OK.getStatus());
-        long goodsId = goodsMapper.insert(goods);
-        goods.setId(goodsId);
+        goodsMapper.insert(goods);
         return goods;
     }
 
     public Goods deleteGoods(long goodsId) {
-        GoodsExample example = new GoodsExample();
-        example.createCriteria().andIdEqualTo(goodsId).andStatusEqualTo(DataStatus.OK.getStatus());
-        List<Goods> goodsList = goodsMapper.selectByExample(example);
-        if (goodsList.size() == 0) {
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
+        if (goods == null || DataStatus.FAIL.getStatus().equals(goods.getStatus())) {
             throw HttpException.notFound("商品不存在！");
         }
-        Goods goods = goodsList.get(0);
         Shop shop = shopMapper.selectByPrimaryKey(goods.getShopId());
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
             throw HttpException.forbidden("不能删除非自己店铺的商品！");
@@ -65,32 +61,33 @@ public class GoodsService {
     }
 
     public Goods updateGoods(Goods goods) {
-        GoodsExample example = new GoodsExample();
-        example.createCriteria().andIdEqualTo(goods.getId()).andStatusEqualTo(DataStatus.OK.getStatus());
-        List<Goods> goodsList = goodsMapper.selectByExample(example);
-        if (goodsList.size() == 0) {
+        Goods queryGoods = goodsMapper.selectByPrimaryKey(goods.getId());
+        if (queryGoods == null || DataStatus.FAIL.getStatus().equals(queryGoods.getStatus())) {
             throw HttpException.notFound("商品不存在！");
         }
-        Goods queryGoods = goodsList.get(0);
         Shop shop = shopMapper.selectByPrimaryKey(queryGoods.getShopId());
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
             throw HttpException.forbidden("不能更新非自己店铺的商品！");
         }
 
-        goods.setShopId(queryGoods.getShopId());
-        goods.setUpdatedAt(new Date());
-        goodsMapper.updateByPrimaryKey(goods);
-        return goods;
+        queryGoods.setStock(goods.getStock());
+        queryGoods.setStatus(goods.getStatus());
+        queryGoods.setImageUrl(goods.getImageUrl());
+        queryGoods.setPrice(goods.getPrice());
+        queryGoods.setName(goods.getName());
+        queryGoods.setDetails(goods.getDetails());
+        queryGoods.setDescription(goods.getDescription());
+        queryGoods.setUpdatedAt(new Date());
+        goodsMapper.updateByPrimaryKey(queryGoods);
+        return queryGoods;
     }
 
     public Goods getGoodsById(Long goodsId) {
-        GoodsExample example = new GoodsExample();
-        example.createCriteria().andIdEqualTo(goodsId).andStatusEqualTo(DataStatus.OK.getStatus());
-        List<Goods> goodsList = goodsMapper.selectByExample(example);
-        if (goodsList.size() == 0) {
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
+        if (goods == null || DataStatus.FAIL.getStatus().equals(goods.getStatus())) {
             throw HttpException.notFound("商品不存在！");
         }
-        return goodsList.get(0);
+        return goods;
     }
 
     public ResponseWithPages<List<Goods>> getGoodsWithPage(GoodsPages goodsPages) {

@@ -4,7 +4,6 @@ import com.bowen.shop.WechatShopApplication;
 import com.bowen.shop.entity.LoginResponse;
 import com.bowen.shop.entity.TelAndCode;
 import com.bowen.shop.service.TelVerificationServiceTest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -14,10 +13,8 @@ import org.apache.hc.core5.http.Method;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -33,15 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = WechatShopApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:test-application.yml")
-public class AuthIntegrationTest {
-    @Autowired
-    Environment environment;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
+public class AuthIntegrationTest extends AbstractIntegrationTest {
     public void return401WhenAccessDenied() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
-            final ClassicHttpRequest sendSmsCode = HttpRequest.createRequestBuilder(environment, Method.POST, "/api/v1/any", TelVerificationServiceTest.VALID_PARAMETER);
+            final ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/any", TelVerificationServiceTest.VALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_UNAUTHORIZED, response.getCode());
             }
@@ -51,7 +43,7 @@ public class AuthIntegrationTest {
     @Test
     public void returnHttpOKWhenParameterIsCorrect() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
-            final ClassicHttpRequest sendSmsCode = HttpRequest.createRequestBuilder(environment, Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
+            final ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_OK, response.getCode());
             }
@@ -61,7 +53,7 @@ public class AuthIntegrationTest {
     @Test
     public void returnHttpBadRequestWhenParameterIsCorrect() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
-            final ClassicHttpRequest sendSmsCode = HttpRequest.createRequestBuilder(environment, Method.POST, "/api/v1/code", TelVerificationServiceTest.INVALID_PARAMETER);
+            final ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.INVALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_BAD_REQUEST, response.getCode());
             }
@@ -78,13 +70,13 @@ public class AuthIntegrationTest {
             testUserInfoWhenNotLogin(httpclient);
 
             // 1. send sms code
-            ClassicHttpRequest sendSmsCode = HttpRequest.createRequestBuilder(environment, Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
+            ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
             try (CloseableHttpResponse response = httpclient.execute(sendSmsCode)) {
                 assertEquals(HTTP_OK, response.getCode());
             }
 
             // 2. login => cookie
-            ClassicHttpRequest login = HttpRequest.createRequestBuilder(environment,
+            ClassicHttpRequest login = createRequestBuilder(
                     Method.POST,
                     "/api/v1/login",
                     new TelAndCode(TelVerificationServiceTest.VALID_PARAMETER.getTel(), "000000"));
@@ -96,7 +88,7 @@ public class AuthIntegrationTest {
             testUserInfoWhenLogged(httpclient);
 
             // 4. logout
-            ClassicHttpRequest logout = HttpRequest.createRequestBuilder(environment, Method.POST, "/api/v1/logout", null);
+            ClassicHttpRequest logout = createRequestBuilder(Method.POST, "/api/v1/logout", null);
             try (CloseableHttpResponse response = httpclient.execute(logout)) {
                 assertEquals(HTTP_OK, response.getCode());
             }
@@ -107,7 +99,7 @@ public class AuthIntegrationTest {
     }
 
     public void testUserInfoWhenLogged(CloseableHttpClient httpclient) throws Exception {
-        ClassicHttpRequest loginInfo = HttpRequest.createRequestBuilder(environment, Method.GET, "/api/v1/status", null);
+        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status", null);
         try (CloseableHttpResponse response = httpclient.execute(loginInfo)) {
             assertEquals(HTTP_OK, response.getCode());
             LoginResponse loginResponse = objectMapper.readValue(EntityUtils.toString(response.getEntity()), LoginResponse.class);
@@ -117,7 +109,7 @@ public class AuthIntegrationTest {
     }
 
     public void testUserInfoWhenNotLogin(CloseableHttpClient httpclient) throws Exception {
-        ClassicHttpRequest loginInfo = HttpRequest.createRequestBuilder(environment, Method.GET, "/api/v1/status", null);
+        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status", null);
         try (CloseableHttpResponse response = httpclient.execute(loginInfo)) {
             assertEquals(HTTP_OK, response.getCode());
             LoginResponse loginResponse = objectMapper.readValue(EntityUtils.toString(response.getEntity()), LoginResponse.class);

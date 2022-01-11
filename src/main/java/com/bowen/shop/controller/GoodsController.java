@@ -198,6 +198,7 @@ public class GoodsController {
      * @apiError 400 Bad Request 若用户请求包含错误
      * @apiError 401 Unauthorized 若用户未登录
      * @apiError 403 Forbidden 若用户尝试更改非自己管理店铺的商品
+     * @apiError 404 Not Found 若商品未找到
      *
      * @apiErrorExample Error-Response:
      *      HTTP/1.1 400 Bad Request
