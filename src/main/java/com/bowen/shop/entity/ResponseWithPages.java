@@ -8,9 +8,20 @@ public class ResponseWithPages<T> extends Pages {
         super();
     }
 
-    public ResponseWithPages(int pageNum, int pageSize, int totalPage, T data) {
-        super(pageNum, pageSize);
+    public static <R> ResponseWithPages<R> response(int pageNum, int pageSize, int totalPage, R data) {
+        ResponseWithPages<R> response = new ResponseWithPages<>();
+        response.setPageNum(pageNum);
+        response.setPageSize(pageSize);
+        response.setTotalPage(totalPage);
+        response.setData(data);
+        return response;
+    }
+
+    public void setTotalPage(int totalPage) {
         this.totalPage = totalPage;
+    }
+
+    public void setData(T data) {
         this.data = data;
     }
 

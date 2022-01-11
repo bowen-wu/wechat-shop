@@ -19,4 +19,12 @@ public class Pages {
     public int getPageSize() {
         return pageSize;
     }
+
+    public void setPageNum(int pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
 }

@@ -1,6 +1,5 @@
 package com.bowen.shop.controller;
 
-import com.bowen.shop.entity.GoodsPages;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
@@ -327,13 +327,20 @@ public class GoodsController {
     /**
      * 分页获取商品列表
      *
-     * @param goodsPages goodsPage
-     * @param response   response
+     * @param pageNum  当前页码
+     * @param pageSize 一页展示多少条数据
+     * @param shopId   店铺ID
+     * @param response response
      * @return 商品列表
      */
     @GetMapping("/goods")
-    public ResponseWithPages<List<Goods>> getGoodsList(@RequestBody GoodsPages goodsPages, HttpServletResponse response) {
+    public ResponseWithPages<List<Goods>> getGoodsList(@RequestParam("pageNum") int pageNum,
+                                                       @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                       @RequestParam(value = "shopId", required = false) Long shopId,
+                                                       HttpServletResponse response) {
+        int defaultPageSize = 10;
+        int isolatePageSize = pageSize == null ? defaultPageSize : pageSize;
         response.setStatus(HttpStatus.OK.value());
-        return goodsService.getGoodsWithPage(goodsPages);
+        return goodsService.getGoodsWithPage(pageNum, isolatePageSize, shopId);
     }
 }

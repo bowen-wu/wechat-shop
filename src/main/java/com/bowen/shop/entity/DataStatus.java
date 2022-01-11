@@ -2,7 +2,7 @@ package com.bowen.shop.entity;
 
 public enum DataStatus {
     OK("ok"),
-    FAIL("fail");
+    DELETED("deleted");
 
     private final String status;
 

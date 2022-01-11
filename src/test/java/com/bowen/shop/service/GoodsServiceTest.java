@@ -1,7 +1,6 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.entity.DataStatus;
-import com.bowen.shop.entity.GoodsPages;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
@@ -105,7 +104,7 @@ class GoodsServiceTest {
         assertEquals("商品不存在！", httpException.getMessage());
 
         Goods testGoods = new Goods();
-        testGoods.setStatus(DataStatus.FAIL.getStatus());
+        testGoods.setStatus(DataStatus.DELETED.getStatus());
         when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
 
         httpException = assertThrows(HttpException.class, () -> {
@@ -148,7 +147,7 @@ class GoodsServiceTest {
 
         Goods goods = goodsService.deleteGoods(testGoodsId);
         verify(goodsMapper).updateByPrimaryKey(testGoods);
-        assertEquals(DataStatus.FAIL.getStatus(), goods.getStatus());
+        assertEquals(DataStatus.DELETED.getStatus(), goods.getStatus());
     }
 
     @Test
@@ -164,7 +163,7 @@ class GoodsServiceTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
         assertEquals("商品不存在！", httpException.getMessage());
 
-        testGoods.setStatus(DataStatus.FAIL.getStatus());
+        testGoods.setStatus(DataStatus.DELETED.getStatus());
         when(goodsMapper.selectByPrimaryKey(any())).thenReturn(testGoods);
 
         httpException = assertThrows(HttpException.class, () -> {
@@ -233,7 +232,7 @@ class GoodsServiceTest {
         assertEquals("商品不存在！", httpException.getMessage());
 
         Goods testGoods = new Goods();
-        testGoods.setStatus(DataStatus.FAIL.getStatus());
+        testGoods.setStatus(DataStatus.DELETED.getStatus());
         when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
 
         httpException = assertThrows(HttpException.class, () -> {
@@ -263,11 +262,10 @@ class GoodsServiceTest {
         testGoods.setId(testGoodsId);
         List<Goods> testGoodsList = new ArrayList<>();
         testGoodsList.add(testGoods);
-        GoodsPages testGoodsPage = new GoodsPages(1, 20, null);
         when(goodsMapper.countByExample(any())).thenReturn(47L);
         when(goodsMapper.selectByExampleWithRowbounds(any(), any())).thenReturn(testGoodsList);
 
-        ResponseWithPages<List<Goods>> goodsWithPage = goodsService.getGoodsWithPage(testGoodsPage);
+        ResponseWithPages<List<Goods>> goodsWithPage = goodsService.getGoodsWithPage(1, 20, null);
 
         assertEquals(3, goodsWithPage.getTotalPage());
         assertEquals(1, goodsWithPage.getPageNum());
@@ -275,11 +273,10 @@ class GoodsServiceTest {
         assertEquals(1, goodsWithPage.getData().size());
         assertEquals(testGoodsId, goodsWithPage.getData().get(0).getId());
 
-        testGoodsPage.setShopId(1L);
         when(goodsMapper.countByExample(any())).thenReturn(80L);
         when(goodsMapper.selectByExampleWithRowbounds(any(), any())).thenReturn(testGoodsList);
 
-        goodsWithPage = goodsService.getGoodsWithPage(testGoodsPage);
+        goodsWithPage = goodsService.getGoodsWithPage(1, 20, 1L);
 
         assertEquals(4, goodsWithPage.getTotalPage());
     }

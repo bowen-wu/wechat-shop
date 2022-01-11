@@ -2,7 +2,6 @@ package com.bowen.shop.integration;
 
 import com.bowen.shop.WechatShopApplication;
 import com.bowen.shop.entity.DataStatus;
-import com.bowen.shop.entity.GoodsPages;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
@@ -199,8 +198,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
                 assertEquals(HTTP_CREATED, response.getCode());
             }
 
-            GoodsPages testGoodsPages = new GoodsPages(2, 4, null);
-            ClassicHttpRequest updateGoods = createRequestBuilder(Method.GET, "/api/v1/goods", testGoodsPages);
+            ClassicHttpRequest updateGoods = createRequestBuilder(Method.GET, "/api/v1/goods?pageNum=2&pageSize=4", null);
             try (CloseableHttpResponse response = httpclient.execute(updateGoods)) {
                 assertEquals(HTTP_OK, response.getCode());
                 ResponseWithPages<List<Goods>> res = objectMapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<ResponseWithPages<List<Goods>>>() {
@@ -226,8 +224,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
                 assertEquals(HTTP_CREATED, response.getCode());
             }
 
-            GoodsPages testGoodsPages = new GoodsPages(1, 2, 1L);
-            ClassicHttpRequest updateGoods = createRequestBuilder(Method.GET, "/api/v1/goods", testGoodsPages);
+            ClassicHttpRequest updateGoods = createRequestBuilder(Method.GET, "/api/v1/goods?pageNum=1&pageSize=2&shopId=1", null);
             try (CloseableHttpResponse response = httpclient.execute(updateGoods)) {
                 assertEquals(HTTP_OK, response.getCode());
                 ResponseWithPages<List<Goods>> res = objectMapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<ResponseWithPages<List<Goods>>>() {

@@ -1,7 +1,6 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.entity.DataStatus;
-import com.bowen.shop.entity.GoodsPages;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
@@ -47,14 +46,14 @@ public class GoodsService {
 
     public Goods deleteGoods(long goodsId) {
         Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
-        if (goods == null || DataStatus.FAIL.getStatus().equals(goods.getStatus())) {
+        if (goods == null || DataStatus.DELETED.getStatus().equals(goods.getStatus())) {
             throw HttpException.notFound("商品不存在！");
         }
         Shop shop = shopMapper.selectByPrimaryKey(goods.getShopId());
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
             throw HttpException.forbidden("不能删除非自己店铺的商品！");
         }
-        goods.setStatus(DataStatus.FAIL.getStatus());
+        goods.setStatus(DataStatus.DELETED.getStatus());
         goods.setUpdatedAt(new Date());
         goodsMapper.updateByPrimaryKey(goods);
         return goods;
@@ -62,7 +61,7 @@ public class GoodsService {
 
     public Goods updateGoods(Goods goods) {
         Goods queryGoods = goodsMapper.selectByPrimaryKey(goods.getId());
-        if (queryGoods == null || DataStatus.FAIL.getStatus().equals(queryGoods.getStatus())) {
+        if (queryGoods == null || DataStatus.DELETED.getStatus().equals(queryGoods.getStatus())) {
             throw HttpException.notFound("商品不存在！");
         }
         Shop shop = shopMapper.selectByPrimaryKey(queryGoods.getShopId());
@@ -84,25 +83,23 @@ public class GoodsService {
 
     public Goods getGoodsById(Long goodsId) {
         Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
-        if (goods == null || DataStatus.FAIL.getStatus().equals(goods.getStatus())) {
+        if (goods == null || DataStatus.DELETED.getStatus().equals(goods.getStatus())) {
             throw HttpException.notFound("商品不存在！");
         }
         return goods;
     }
 
-    public ResponseWithPages<List<Goods>> getGoodsWithPage(GoodsPages goodsPages) {
-        int pageSize = goodsPages.getPageSize();
-        int pageNum = goodsPages.getPageNum();
+    public ResponseWithPages<List<Goods>> getGoodsWithPage(int pageNum, int pageSize, Long shopId) {
         GoodsExample goodsExample = new GoodsExample();
-        if (goodsPages.getShopId() == null) {
+        if (shopId == null) {
             goodsExample.createCriteria().andStatusEqualTo(DataStatus.OK.getStatus());
         } else {
-            goodsExample.createCriteria().andStatusEqualTo(DataStatus.OK.getStatus()).andShopIdEqualTo(goodsPages.getShopId());
+            goodsExample.createCriteria().andStatusEqualTo(DataStatus.OK.getStatus()).andShopIdEqualTo(shopId);
         }
         long total = goodsMapper.countByExample(goodsExample);
         int totalPage = (int) (total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
         List<Goods> goodsList = goodsMapper.selectByExampleWithRowbounds(goodsExample,
                 new RowBounds((pageNum - 1) * pageSize, pageSize));
-        return new ResponseWithPages<>(pageNum, pageSize, totalPage, goodsList);
+        return ResponseWithPages.response(pageNum, pageSize, totalPage, goodsList);
     }
 }
