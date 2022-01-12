@@ -59,7 +59,7 @@ public class GoodsController {
      *              "shopId": 12345 // required
      *          }
      *
-     * @apiSuccess {Goods} data 创建的商品
+     * @apiSuccess (Success 201) {Goods} data 创建的商品
      * @apiSuccessExample Success-Response:
      *      HTTP/1.1 201 Created
      *      {
@@ -116,7 +116,7 @@ public class GoodsController {
      * @apiGroup Goods
      *
      * @apiParam {Number} id 商品id
-     * @apiSuccess {Goods} data 被删除的商品
+     * @apiSuccess (Success 204) {Goods} data 被删除的商品
      * @apiSuccessExample Success-Response:
      *      HTTP/1.1 204 No Content
      *      {
@@ -169,6 +169,7 @@ public class GoodsController {
      *
      * @apiParamExample {json} Request-Example:
      *          {
+     *              "id": 123,
      *              "name": "肥皂",
      *              "description": "纯天然无污染肥皂",
      *              "details": "这是一块好肥皂",
