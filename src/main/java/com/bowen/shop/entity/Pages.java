@@ -3,6 +3,7 @@ package com.bowen.shop.entity;
 public class Pages {
     private int pageNum;
     private int pageSize;
+    public static final int DEFAULT_PAGE_SIZE = 10;
 
     public Pages() {
     }

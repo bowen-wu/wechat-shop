@@ -1,9 +1,16 @@
 package com.bowen.shop.controller;
 
+import com.bowen.shop.entity.DataStatus;
+import com.bowen.shop.entity.HttpException;
+import com.bowen.shop.entity.Pages;
+import com.bowen.shop.entity.Response;
+import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Shop;
 import com.bowen.shop.service.ShopService;
+import com.bowen.shop.service.UserContext;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,6 +34,20 @@ public class ShopController {
     @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public ShopController(ShopService shopService) {
         this.shopService = shopService;
+    }
+
+    public void clean(Shop shop) {
+        shop.setId(null);
+        if (shop.getStatus() == null) {
+            shop.setStatus(DataStatus.OK.getStatus());
+        }
+        shop.setOwnerUserId(UserContext.getCurrentUser().getId());
+        shop.setCreatedAt(new Date());
+        shop.setUpdatedAt(new Date());
+    }
+
+    public boolean checkShopAttributeInvalid(Shop shop) {
+        return shop.getName() == null || shop.getDescription() == null || shop.getImgUrl() == null;
     }
 
     /**
@@ -73,9 +96,17 @@ public class ShopController {
      *
      * @param shop     店铺信息
      * @param response response
+     * @return 店铺信息
      */
     @PostMapping("/shop")
-    public void createShop(@RequestBody Shop shop, HttpServletResponse response) {
+    public Response<Shop> createShop(@RequestBody Shop shop, HttpServletResponse response) {
+        if (checkShopAttributeInvalid(shop)) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return Response.fail("请检查参数！");
+        }
+        clean(shop);
+        response.setStatus(HttpStatus.CREATED.value());
+        return Response.success(shopService.createShop(shop));
     }
 
     /**
@@ -110,9 +141,17 @@ public class ShopController {
      *
      * @param shopId   店铺ID
      * @param response response
+     * @return 删除的店铺
      */
     @DeleteMapping("/shop/{shopId}")
-    public void deleteShop(@PathVariable("shopId") Long shopId, HttpServletResponse response) {
+    public Response<Shop> deleteShop(@PathVariable("shopId") Long shopId, HttpServletResponse response) {
+        try {
+            response.setStatus(HttpStatus.NO_CONTENT.value());
+            return Response.success(shopService.deleteShop(shopId));
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return Response.fail(exception.getMessage());
+        }
     }
 
     /**
@@ -154,9 +193,20 @@ public class ShopController {
      *
      * @param shop     店铺信息
      * @param response response
+     * @return 更新后的店铺
      */
-    @PatchMapping("/shop}")
-    public void updateShop(@RequestBody Shop shop, HttpServletResponse response) {
+    @PatchMapping("/shop")
+    public Response<Shop> updateShop(@RequestBody Shop shop, HttpServletResponse response) {
+        if (shop.getId() == null || checkShopAttributeInvalid(shop)) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return Response.fail("请检查参数！");
+        }
+        try {
+            return Response.success(shopService.updateShop(shop));
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return Response.fail(exception.getMessage());
+        }
     }
 
     /**
@@ -189,14 +239,21 @@ public class ShopController {
      *
      * @param shopId   店铺id
      * @param response response
+     * @return 店铺
      */
     @GetMapping("/shop/{shopId}")
-    public void getShopById(@PathVariable("shopId") Long shopId, HttpServletResponse response) {
+    public Response<Shop> getShopById(@PathVariable("shopId") Long shopId, HttpServletResponse response) {
+        try {
+            return Response.success(shopService.getShopById(shopId));
+        } catch (HttpException exception) {
+            response.setStatus(exception.getStatusCode());
+            return Response.fail(exception.getMessage());
+        }
     }
 
     /**
      * @api {get} /shop 获取当前用户名下的所有店铺
-     * @apiName getShopList
+     * @apiName getShopListWithPage
      * @apiGroup Shop
      *
      * @apiParam {Number} pageNum 页数，从1开始
@@ -237,12 +294,13 @@ public class ShopController {
      *
      * @param pageNum  页码，从1开始
      * @param pageSize 每页显示数量
-     * @param response response
+     * @return 店铺列表
      */
     @GetMapping("/shop")
-    public void getShopList(@RequestParam("pageNum") int pageNum,
-                            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                            HttpServletResponse response) {
-
+    public ResponseWithPages<List<Shop>> getShopListWithPage(@RequestParam("pageNum") int pageNum,
+                                                             @RequestParam(value = "pageSize", required = false) Integer pageSize
+    ) {
+        int isolatePageSize = pageSize == null ? Pages.DEFAULT_PAGE_SIZE : pageSize;
+        return shopService.getShopListWithPage(pageNum, isolatePageSize);
     }
 }

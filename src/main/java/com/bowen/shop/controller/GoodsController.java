@@ -1,6 +1,7 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.entity.HttpException;
+import com.bowen.shop.entity.Pages;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
@@ -331,17 +332,14 @@ public class GoodsController {
      * @param pageNum  当前页码
      * @param pageSize 一页展示多少条数据
      * @param shopId   店铺ID
-     * @param response response
      * @return 商品列表
      */
     @GetMapping("/goods")
     public ResponseWithPages<List<Goods>> getGoodsList(@RequestParam("pageNum") int pageNum,
                                                        @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                                                       @RequestParam(value = "shopId", required = false) Long shopId,
-                                                       HttpServletResponse response) {
-        int defaultPageSize = 10;
-        int isolatePageSize = pageSize == null ? defaultPageSize : pageSize;
-        response.setStatus(HttpStatus.OK.value());
+                                                       @RequestParam(value = "shopId", required = false) Long shopId
+    ) {
+        int isolatePageSize = pageSize == null ? Pages.DEFAULT_PAGE_SIZE : pageSize;
         return goodsService.getGoodsWithPage(pageNum, isolatePageSize, shopId);
     }
 }
