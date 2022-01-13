@@ -29,13 +29,13 @@ public class ShopService {
         return shop;
     }
 
-    public void checkShopIsNotFound(Shop shop) {
+    private void checkShopIsNotFound(Shop shop) {
         if (shop == null || DataStatus.DELETED.getStatus().equals(shop.getStatus())) {
             throw HttpException.notFound("店铺不存在！");
         }
     }
 
-    public void checkShopIsForbidden(Shop shop, String errorMessage) {
+    private void checkShopIsForbidden(Shop shop, String errorMessage) {
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
             throw HttpException.forbidden(errorMessage);
         }

@@ -30,11 +30,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GoodsServiceTest {
     @Mock
-    GoodsMapper goodsMapper;
+    GoodsMapper mockGoodsMapper;
     @Mock
-    ShopMapper shopMapper;
+    ShopMapper mockShopMapper;
     @InjectMocks
-    GoodsService goodsService;
+    GoodsService mockGoodsService;
 
     private static final User currentUser = new User();
 
@@ -53,10 +53,10 @@ class GoodsServiceTest {
     public void returnNotFoundWhenCreateGoods() {
         Goods testGoods = new Goods();
         testGoods.setShopId(1L);
-        when(shopMapper.selectByPrimaryKey(1L)).thenReturn(null);
+        when(mockShopMapper.selectByPrimaryKey(1L)).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.createGoods(testGoods);
+            mockGoodsService.createGoods(testGoods);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
@@ -69,10 +69,10 @@ class GoodsServiceTest {
         testGoods.setShopId(1L);
         Shop testShop = new Shop();
         testShop.setOwnerUserId(2L);
-        when(shopMapper.selectByPrimaryKey(1L)).thenReturn(testShop);
+        when(mockShopMapper.selectByPrimaryKey(1L)).thenReturn(testShop);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.createGoods(testGoods);
+            mockGoodsService.createGoods(testGoods);
         });
 
         assertEquals(HttpStatus.FORBIDDEN.value(), httpException.getStatusCode());
@@ -85,19 +85,19 @@ class GoodsServiceTest {
         testGoods.setShopId(1L);
         Shop testShop = new Shop();
         testShop.setOwnerUserId(3L);
-        when(shopMapper.selectByPrimaryKey(1L)).thenReturn(testShop);
+        when(mockShopMapper.selectByPrimaryKey(1L)).thenReturn(testShop);
 
-        Goods goods = goodsService.createGoods(testGoods);
+        Goods goods = mockGoodsService.createGoods(testGoods);
         assertEquals(DataStatus.OK.getStatus(), goods.getStatus());
     }
 
     @Test
     public void returnNotFoundWhenDeleteGoods() {
         long testGoodsId = 1L;
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(null);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.deleteGoods(testGoodsId);
+            mockGoodsService.deleteGoods(testGoodsId);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
@@ -105,10 +105,10 @@ class GoodsServiceTest {
 
         Goods testGoods = new Goods();
         testGoods.setStatus(DataStatus.DELETED.getStatus());
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
 
         httpException = assertThrows(HttpException.class, () -> {
-            goodsService.deleteGoods(testGoodsId);
+            mockGoodsService.deleteGoods(testGoodsId);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
@@ -123,11 +123,11 @@ class GoodsServiceTest {
         testGoods.setShopId(testShopId);
         Shop testShop = new Shop();
         testShop.setOwnerUserId(2L);
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
-        when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockShopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.deleteGoods(testGoodsId);
+            mockGoodsService.deleteGoods(testGoodsId);
         });
 
         assertEquals(HttpStatus.FORBIDDEN.value(), httpException.getStatusCode());
@@ -142,11 +142,11 @@ class GoodsServiceTest {
         testGoods.setShopId(testShopId);
         Shop testShop = new Shop();
         testShop.setOwnerUserId(3L);
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
-        when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockShopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
-        Goods goods = goodsService.deleteGoods(testGoodsId);
-        verify(goodsMapper).updateByPrimaryKey(testGoods);
+        Goods goods = mockGoodsService.deleteGoods(testGoodsId);
+        verify(mockGoodsMapper).updateByPrimaryKey(testGoods);
         assertEquals(DataStatus.DELETED.getStatus(), goods.getStatus());
     }
 
@@ -154,20 +154,20 @@ class GoodsServiceTest {
     public void returnNotFoundWhenUpdateGoods() {
         Goods testGoods = new Goods();
         testGoods.setId(1L);
-        when(goodsMapper.selectByPrimaryKey(any())).thenReturn(null);
+        when(mockGoodsMapper.selectByPrimaryKey(any())).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.updateGoods(testGoods);
+            mockGoodsService.updateGoods(testGoods);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
         assertEquals("商品不存在！", httpException.getMessage());
 
         testGoods.setStatus(DataStatus.DELETED.getStatus());
-        when(goodsMapper.selectByPrimaryKey(any())).thenReturn(testGoods);
+        when(mockGoodsMapper.selectByPrimaryKey(any())).thenReturn(testGoods);
 
         httpException = assertThrows(HttpException.class, () -> {
-            goodsService.updateGoods(testGoods);
+            mockGoodsService.updateGoods(testGoods);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
@@ -187,11 +187,11 @@ class GoodsServiceTest {
         Shop testShop = new Shop();
         testShop.setOwnerUserId(2L);
 
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
-        when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockShopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.updateGoods(testGoods);
+            mockGoodsService.updateGoods(testGoods);
         });
 
         assertEquals(HttpStatus.FORBIDDEN.value(), httpException.getStatusCode());
@@ -210,10 +210,10 @@ class GoodsServiceTest {
         Shop testShop = new Shop();
         testShop.setOwnerUserId(3L);
 
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
-        when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockShopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
-        Goods goods = goodsService.updateGoods(testGoods);
+        Goods goods = mockGoodsService.updateGoods(testGoods);
 
         assertEquals(testGoods.getId(), goods.getId());
         assertEquals(testGoods.getShopId(), goods.getShopId());
@@ -222,10 +222,10 @@ class GoodsServiceTest {
     @Test
     public void returnNotFoundWhenGetGoodsById() {
         long testGoodsId = 1L;
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(null);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(null);
 
         HttpException httpException = assertThrows(HttpException.class, () -> {
-            goodsService.getGoodsById(testGoodsId);
+            mockGoodsService.getGoodsById(testGoodsId);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
@@ -233,10 +233,10 @@ class GoodsServiceTest {
 
         Goods testGoods = new Goods();
         testGoods.setStatus(DataStatus.DELETED.getStatus());
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
 
         httpException = assertThrows(HttpException.class, () -> {
-            goodsService.getGoodsById(testGoodsId);
+            mockGoodsService.getGoodsById(testGoodsId);
         });
 
         assertEquals(HttpStatus.NOT_FOUND.value(), httpException.getStatusCode());
@@ -248,9 +248,9 @@ class GoodsServiceTest {
         long testGoodsId = 1L;
         Goods testGoods = new Goods();
         testGoods.setId(testGoodsId);
-        when(goodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
+        when(mockGoodsMapper.selectByPrimaryKey(testGoodsId)).thenReturn(testGoods);
 
-        Goods goods = goodsService.getGoodsById(testGoodsId);
+        Goods goods = mockGoodsService.getGoodsById(testGoodsId);
 
         assertEquals(testGoodsId, goods.getId());
     }
@@ -262,10 +262,10 @@ class GoodsServiceTest {
         testGoods.setId(testGoodsId);
         List<Goods> testGoodsList = new ArrayList<>();
         testGoodsList.add(testGoods);
-        when(goodsMapper.countByExample(any())).thenReturn(47L);
-        when(goodsMapper.selectByExampleWithRowbounds(any(), any())).thenReturn(testGoodsList);
+        when(mockGoodsMapper.countByExample(any())).thenReturn(47L);
+        when(mockGoodsMapper.selectByExampleWithRowbounds(any(), any())).thenReturn(testGoodsList);
 
-        ResponseWithPages<List<Goods>> goodsWithPage = goodsService.getGoodsWithPage(1, 20, null);
+        ResponseWithPages<List<Goods>> goodsWithPage = mockGoodsService.getGoodsWithPage(1, 20, null);
 
         assertEquals(3, goodsWithPage.getTotalPage());
         assertEquals(1, goodsWithPage.getPageNum());
@@ -273,10 +273,10 @@ class GoodsServiceTest {
         assertEquals(1, goodsWithPage.getData().size());
         assertEquals(testGoodsId, goodsWithPage.getData().get(0).getId());
 
-        when(goodsMapper.countByExample(any())).thenReturn(80L);
-        when(goodsMapper.selectByExampleWithRowbounds(any(), any())).thenReturn(testGoodsList);
+        when(mockGoodsMapper.countByExample(any())).thenReturn(80L);
+        when(mockGoodsMapper.selectByExampleWithRowbounds(any(), any())).thenReturn(testGoodsList);
 
-        goodsWithPage = goodsService.getGoodsWithPage(1, 20, 1L);
+        goodsWithPage = mockGoodsService.getGoodsWithPage(1, 20, 1L);
 
         assertEquals(4, goodsWithPage.getTotalPage());
     }
