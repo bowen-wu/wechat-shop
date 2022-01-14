@@ -33,7 +33,6 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = WechatShopApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -234,13 +233,6 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
                 assertEquals(2, res.getTotalPage());
                 assertEquals(2, res.getData().size());
             }
-        }
-    }
-
-    public void assertHttpException(CloseableHttpClient httpclient, Method method, String api, Object data, int HttpStatusCode, String errorMessage) throws Exception {
-        try (CloseableHttpResponse response = httpclient.execute(createRequestBuilder(method, api, data))) {
-            assertEquals(HttpStatusCode, response.getCode());
-            assertTrue(EntityUtils.toString(response.getEntity()).contains(errorMessage));
         }
     }
 }

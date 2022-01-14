@@ -9,6 +9,7 @@ import com.bowen.shop.generate.Shop;
 import com.bowen.shop.service.ShopService;
 import com.bowen.shop.service.UserContext;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,7 +39,8 @@ public class ShopController {
 
     public void clean(Shop shop) {
         shop.setId(null);
-        if (shop.getStatus() == null) {
+
+        if (StringUtils.isBlank(shop.getStatus())) {
             shop.setStatus(DataStatus.OK.getStatus());
         }
         shop.setOwnerUserId(UserContext.getCurrentUser().getId());
@@ -47,7 +49,7 @@ public class ShopController {
     }
 
     public boolean checkShopAttributeInvalid(Shop shop) {
-        return shop.getName() == null || shop.getDescription() == null || shop.getImgUrl() == null;
+        return StringUtils.isBlank(shop.getName()) || StringUtils.isBlank(shop.getDescription()) || StringUtils.isBlank(shop.getImgUrl());
     }
 
     /**

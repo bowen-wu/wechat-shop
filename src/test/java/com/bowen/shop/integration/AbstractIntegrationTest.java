@@ -1,11 +1,15 @@
 package com.bowen.shop.integration;
 
+import com.bowen.shop.entity.LoginResponse;
 import com.bowen.shop.entity.TelAndCode;
+import com.bowen.shop.generate.User;
 import com.bowen.shop.service.TelVerificationServiceTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.Method;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.ClassicConfiguration;
@@ -16,6 +20,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 
 import java.net.URI;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AbstractIntegrationTest {
     @Value("${spring.datasource.url}")
@@ -55,7 +62,7 @@ public abstract class AbstractIntegrationTest {
         return accept.build();
     }
 
-    public void login(CloseableHttpClient httpclient) throws Exception {
+    public User login(CloseableHttpClient httpclient) throws Exception {
         // 1. send sms code
         ClassicHttpRequest sendSmsCode = createRequestBuilder(Method.POST, "/api/v1/code", TelVerificationServiceTest.VALID_PARAMETER);
         httpclient.execute(sendSmsCode);
@@ -65,5 +72,19 @@ public abstract class AbstractIntegrationTest {
                 "/api/v1/login",
                 new TelAndCode(TelVerificationServiceTest.VALID_PARAMETER.getTel(), "000000"));
         httpclient.execute(login);
+
+        // 3. 获取用户信息
+        ClassicHttpRequest loginInfo = createRequestBuilder(Method.GET, "/api/v1/status", null);
+        try (CloseableHttpResponse response = httpclient.execute(loginInfo)) {
+            LoginResponse loginResponse = objectMapper.readValue(EntityUtils.toString(response.getEntity()), LoginResponse.class);
+            return loginResponse.getUser();
+        }
+    }
+
+    public void assertHttpException(CloseableHttpClient httpclient, Method method, String api, Object data, int HttpStatusCode, String errorMessage) throws Exception {
+        try (CloseableHttpResponse response = httpclient.execute(createRequestBuilder(method, api, data))) {
+            assertEquals(HttpStatusCode, response.getCode());
+            assertTrue(EntityUtils.toString(response.getEntity()).contains(errorMessage));
+        }
     }
 }
