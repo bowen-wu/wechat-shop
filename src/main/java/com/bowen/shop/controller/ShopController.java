@@ -29,7 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class ShopController {
-    private ShopService shopService;
+    private final ShopService shopService;
 
     @Autowired
     @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
