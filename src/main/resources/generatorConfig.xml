@@ -5,6 +5,7 @@
 
 <generatorConfiguration>
     <context id="wechatShop" targetRuntime="MyBatis3">
+        <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"/>
         <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"/>
         <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
@@ -51,6 +52,11 @@
         </table>
 
         <table schema="shop" tableName="ORDER_GOODS" domainObjectName="OrderGoods">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <table schema="shop" tableName="SHOPPING_CART" domainObjectName="ShoppingCart">
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
         </table>

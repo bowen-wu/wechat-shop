@@ -1,6 +1,8 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.entity.AddToShoppingCartGoods;
+import com.bowen.shop.service.ShoppingCartService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class ShoppingCartController {
+
+    private ShoppingCartService shoppingCartService;
+
+    @Autowired
+    public ShoppingCartController(ShoppingCartService shoppingCartService) {
+        this.shoppingCartService = shoppingCartService;
+    }
+
     /**
      * @apiDefine ErrorResponse
      *
@@ -160,7 +170,7 @@ public class ShoppingCartController {
      * @apiUse ErrorResponse
      */
     /**
-     * 分页获取当前用户名下的所有购物车物品
+     * 加商品到购物车中
      *
      * @param addToShoppingCartGoodsList 加入到购物车的商品列表
      * @param response                   response
@@ -169,6 +179,7 @@ public class ShoppingCartController {
     @PostMapping("/shoppingCart")
     public void addGoodsListToShoppingCart(@RequestBody List<AddToShoppingCartGoods> addToShoppingCartGoodsList,
                                            HttpServletResponse response) {
+        shoppingCartService.addGoodsListToShoppingCart(addToShoppingCartGoodsList);
 
     }
 
