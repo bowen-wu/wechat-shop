@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bowen.shop.generate.CustomShoppingCartMapper">
+    <insert id="batchInsert" parameterType="List">
+        INSERT INTO SHOPPING_CART
+        (SHOP_ID, GOODS_ID, USER_ID, NUMBER, STATUS, CREATED_AT, UPDATED_AT)
+        VALUES
+        <foreach collection="list" item="com.bowen.shop.generate.ShoppingCart" separator=",">
+            (#{SHOP_ID}, #{GOODS_ID}, #{USER_ID}, #{NUMBER}, #{STATUS}, #{CREATED_AT}, #{UPDATED_AT})
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="List">
+        UPDATE SHOPPING_CART
+        <foreach collection="list" item="com.bowen.shop.generate.ShoppingCart" separator=",">
+            NUMBER = #{number}, UPDATED_AT = #{updatedAt} where ID = #{ID}
+        </foreach>
+    </update>
+
+    <update id="batchDelete" parameterType="List">
+        DELETE FROM SHOPPING_CART
+        <foreach collection="list" item="com.bowen.shop.generate.ShoppingCart" separator=",">
+            where ID = #{ID}
+        </foreach>
+    </update>
+</mapper>

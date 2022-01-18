@@ -1,8 +1,15 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.entity.AddToShoppingCartGoods;
+import com.bowen.shop.entity.HttpException;
+import com.bowen.shop.entity.Pages;
+import com.bowen.shop.entity.Response;
+import com.bowen.shop.entity.ShoppingCartResponse;
 import com.bowen.shop.service.ShoppingCartService;
+import com.bowen.shop.service.UserContext;
+import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +47,7 @@ public class ShoppingCartController {
 
     /**
      * @api {get} /shoppingCart 分页获取当前用户名下的所有购物车物品
-     * @apiName getAllGoodsInShoppingCart
+     * @apiName getGoodsWithPageFromShoppingCart
      * @apiGroup ShoppingCart
      *
      * @apiParam {Number} pageNum 页数，从1开始
@@ -105,10 +112,18 @@ public class ShoppingCartController {
      * @return 购物车物品
      */
     @GetMapping("/shoppingCart")
-    public void getAllGoodsInShoppingCart(@RequestParam("pageNum") int pageNum,
-                                          @RequestParam("pageSize") Integer pageSize,
-                                          HttpServletResponse response) {
-
+    public Response<List<ShoppingCartResponse>> getGoodsWithPageFromShoppingCart(@RequestParam("pageNum") int pageNum,
+                                                                                 @RequestParam("pageSize") Integer pageSize,
+                                                                                 HttpServletResponse response) {
+        try {
+            return Response.success(shoppingCartService.getGoodsWithPageFromShoppingCart(
+                    pageNum,
+                    pageSize == null ? Pages.DEFAULT_PAGE_SIZE : pageSize,
+                    UserContext.getCurrentUser().getId()));
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
+            return Response.fail(e.getMessage());
+        }
     }
 
     /**
@@ -163,7 +178,7 @@ public class ShoppingCartController {
      *                      ...
      *                  }
      *              ]
-     *              }
+     *          }
      *      }
      *
      * @apiError 404 Not Found 若店铺未找到
@@ -174,13 +189,21 @@ public class ShoppingCartController {
      *
      * @param addToShoppingCartGoodsList 加入到购物车的商品列表
      * @param response                   response
-     * @return 购物车物品
+     * @return 该店铺在购物车中的所有商品
      */
     @PostMapping("/shoppingCart")
-    public void addGoodsListToShoppingCart(@RequestBody List<AddToShoppingCartGoods> addToShoppingCartGoodsList,
-                                           HttpServletResponse response) {
-        shoppingCartService.addGoodsListToShoppingCart(addToShoppingCartGoodsList);
-
+    public Response<ShoppingCartResponse> addGoodsListToShoppingCart(@RequestBody List<AddToShoppingCartGoods> addToShoppingCartGoodsList,
+                                                                     HttpServletResponse response) {
+        if (addToShoppingCartGoodsList.stream().anyMatch(addToShoppingCartGoods -> addToShoppingCartGoods.getNumber() <= 0)) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return Response.fail("请求参数错误！");
+        }
+        try {
+            return Response.success(shoppingCartService.addGoodsListToShoppingCart(addToShoppingCartGoodsList, UserContext.getCurrentUser().getId()));
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
+            return Response.fail(e.getMessage());
+        }
     }
 
     /**
@@ -238,9 +261,14 @@ public class ShoppingCartController {
      * @return 购物车物品
      */
     @DeleteMapping("/shoppingCart/{goodsId}")
-    public void deleteGoodsInShoppingCart(@PathVariable("goodsId") long goodsId,
-                                          HttpServletResponse response) {
-
+    public Response<ShoppingCartResponse> deleteGoodsInShoppingCart(@PathVariable("goodsId") long goodsId,
+                                                                    HttpServletResponse response) {
+        try {
+            return Response.success(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
+            return Response.fail(e.getMessage());
+        }
     }
 
 }
