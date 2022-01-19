@@ -1,18 +1,20 @@
 package com.bowen.shop.entity;
 
 import com.bowen.shop.generate.Shop;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
-public class ShoppingCartResponse {
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
+public class ShoppingCartData {
     private Shop shop;
     private List<GoodsWithNumber> goodsWithNumberList;
 
-    public static ShoppingCartResponse of(Shop shop, List<GoodsWithNumber> goodsWithNumberList) {
-        return new ShoppingCartResponse(shop, goodsWithNumberList);
+    public static ShoppingCartData of(Shop shop, List<GoodsWithNumber> goodsWithNumberList) {
+        return new ShoppingCartData(shop, goodsWithNumberList);
     }
 
-    private ShoppingCartResponse(Shop shop, List<GoodsWithNumber> goodsWithNumberList) {
+    private ShoppingCartData(Shop shop, List<GoodsWithNumber> goodsWithNumberList) {
         this.shop = shop;
         this.goodsWithNumberList = goodsWithNumberList;
     }

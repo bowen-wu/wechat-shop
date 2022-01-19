@@ -1,7 +1,6 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.entity.DataStatus;
-import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Shop;
 import com.bowen.shop.generate.ShopMapper;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,15 +53,8 @@ class ShopServiceTest {
         assertEquals(createdShop, testShop);
     }
 
-    private void assertHttpException(Executable executable, HttpStatus httpStatus, String errorMessage) {
-        HttpException httpException = assertThrows(HttpException.class, executable);
-
-        assertEquals(httpStatus.value(), httpException.getStatusCode());
-        assertEquals(errorMessage, httpException.getMessage());
-    }
-
     private void assertNotFound(Executable executable) {
-        assertHttpException(executable, HttpStatus.NOT_FOUND, "店铺不存在！");
+        TestHelper.assertHttpException(executable, HttpStatus.NOT_FOUND, "店铺不存在！");
     }
 
     @Test
@@ -90,7 +81,7 @@ class ShopServiceTest {
         queryShop.setOwnerUserId(2L);
 
         when(mockShopMapper.selectByPrimaryKey(deleteShopId)).thenReturn(queryShop);
-        assertHttpException(() -> mockShopService.deleteShop(deleteShopId), HttpStatus.FORBIDDEN, "不能删除非自己管理的店铺！");
+        TestHelper.assertHttpException(() -> mockShopService.deleteShop(deleteShopId), HttpStatus.FORBIDDEN, "不能删除非自己管理的店铺！");
     }
 
     @Test
@@ -138,7 +129,7 @@ class ShopServiceTest {
         queryShop.setOwnerUserId(2L);
 
         when(mockShopMapper.selectByPrimaryKey(updateShopId)).thenReturn(queryShop);
-        assertHttpException(() -> mockShopService.updateShop(pendingUpdateShop), HttpStatus.FORBIDDEN, "不能更新非自己管理的店铺！");
+        TestHelper.assertHttpException(() -> mockShopService.updateShop(pendingUpdateShop), HttpStatus.FORBIDDEN, "不能更新非自己管理的店铺！");
     }
 
     @Test

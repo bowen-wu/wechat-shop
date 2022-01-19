@@ -5,7 +5,8 @@ import com.bowen.shop.entity.AddToShoppingCartGoods;
 import com.bowen.shop.entity.DataStatus;
 import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.HttpException;
-import com.bowen.shop.entity.ShoppingCartResponse;
+import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.entity.ShoppingCartData;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.generate.GoodsMapper;
 import com.bowen.shop.generate.Shop;
@@ -13,7 +14,7 @@ import com.bowen.shop.generate.ShopMapper;
 import com.bowen.shop.generate.ShoppingCart;
 import com.bowen.shop.generate.ShoppingCartExample;
 import com.bowen.shop.generate.ShoppingCartMapper;
-import org.apache.ibatis.session.RowBounds;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,7 @@ public class ShoppingCartService {
     private final CustomShoppingCartMapper customShoppingCartMapper;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public ShoppingCartService(GoodsMapper goodsMapper,
                                ShopMapper shopMapper,
                                ShoppingCartMapper shoppingCartMapper,
@@ -41,18 +43,6 @@ public class ShoppingCartService {
         this.shopMapper = shopMapper;
         this.shoppingCartMapper = shoppingCartMapper;
         this.customShoppingCartMapper = customShoppingCartMapper;
-    }
-
-    private AddToShoppingCartGoods mixinGoodsNumberFromPendingAndDatabase(AddToShoppingCartGoods pendingShoppingCartGoods,
-                                                                          List<ShoppingCart> shoppingCartListFromDatabase) {
-        ShoppingCart shoppingCart = shoppingCartListFromDatabase.stream()
-                .filter(isolateShoppingCart -> isolateShoppingCart.getGoodsId().equals(pendingShoppingCartGoods.getId()))
-                .collect(Collectors.toList())
-                .get(0);
-        if (shoppingCart != null) {
-            pendingShoppingCartGoods.setNumber(shoppingCart.getNumber());
-        }
-        return pendingShoppingCartGoods;
     }
 
     private AddToShoppingCartGoods includeGoodsInList(long goodsId, List<AddToShoppingCartGoods> addToShoppingCartGoodsList) {
@@ -65,42 +55,8 @@ public class ShoppingCartService {
         return goodsSingleList.get(0);
     }
 
-    private boolean isGoodsIdInList(long goodsId, List<AddToShoppingCartGoods> addToShoppingCartGoodsList) {
-        return addToShoppingCartGoodsList.stream().anyMatch(goods -> goods.getId() == goodsId);
-    }
-
-
-    public ShoppingCartResponse addGoodsListToShoppingCart(List<AddToShoppingCartGoods> addToShoppingCartGoodsList, Long userId) {
-        // 如果该商品在购物车中则更新，如果不在则新增
-        List<Long> goodsIdList = addToShoppingCartGoodsList.stream().distinct().map(AddToShoppingCartGoods::getId).collect(Collectors.toList());
-
-        // insert
-        List<GoodsWithNumber> goodsWithNumberList = addToShoppingCartGoodsList.stream()
-                .filter(pendingGoods -> isGoodsIdInList(pendingGoods.getId(), addToShoppingCartGoodsList))
-                .map(pendingGoods -> extracted(pendingGoods.getId(), pendingGoods.getNumber()))
-                .collect(Collectors.toList());
-
-        Shop queryShopFromDatabase = shopMapper.selectByPrimaryKey(goodsWithNumberList.get(0).getShopId());
-        if (queryShopFromDatabase == null || DataStatus.DELETED.getStatus().equals(queryShopFromDatabase.getStatus())) {
-            throw HttpException.notFound("店铺未找到！shopId" + goodsWithNumberList.get(0).getShopId());
-        }
-
-        List<ShoppingCart> shoppingCartList = goodsWithNumberList.stream()
-                .map(goodsWithNumber -> convertToShoppingCartFromGoodsWithNumber(goodsWithNumber, queryShopFromDatabase.getId(), userId))
-                .collect(Collectors.toList());
-
-        // update
-        ShoppingCartExample goodsIdListExample = new ShoppingCartExample();
-        goodsIdListExample.createCriteria().andGoodsIdIn(goodsIdList);
-        List<ShoppingCart> existGoodsInDatabase = shoppingCartMapper.selectByExample(goodsIdListExample);
-        for (ShoppingCart existGoods : existGoodsInDatabase) {
-            existGoods.setNumber(Objects.requireNonNull(includeGoodsInList(existGoods.getGoodsId(), addToShoppingCartGoodsList)).getNumber());
-        }
-
-        customShoppingCartMapper.batchUpdate(existGoodsInDatabase);
-        customShoppingCartMapper.batchInsert(shoppingCartList);
-
-        return ShoppingCartResponse.of(queryShopFromDatabase, goodsWithNumberList);
+    private boolean isGoodsIdNotInList(long goodsId, List<ShoppingCart> shoppingCartList) {
+        return shoppingCartList.stream().anyMatch(goods -> goods.getGoodsId() != goodsId);
     }
 
     private ShoppingCart convertToShoppingCartFromGoodsWithNumber(GoodsWithNumber goodsWithNumber, Long shopId, Long userId) {
@@ -115,7 +71,7 @@ public class ShoppingCartService {
         return shoppingCart;
     }
 
-    private GoodsWithNumber generateGoodsWithNumber(Goods goods, int number) {
+    private GoodsWithNumber convertGoodsWithNumberFromGoodsAndNumber(Goods goods, int number) {
         GoodsWithNumber goodsWithNumber = new GoodsWithNumber();
         goodsWithNumber.setNumber(number);
         goodsWithNumber.setCreatedAt(goods.getCreatedAt());
@@ -132,7 +88,54 @@ public class ShoppingCartService {
         return goodsWithNumber;
     }
 
-    public ShoppingCartResponse deleteGoodsInShoppingCart(long goodsId, Long userId) {
+    private Map<Long, List<GoodsWithNumber>> getShopIdMapGoodsWithNumberList(List<ShoppingCart> shoppingCartList) {
+        // TODO: stream
+        Map<Long, List<GoodsWithNumber>> shopWithGoodsListMap = new ConcurrentHashMap<>();
+        for (ShoppingCart shoppingCart : shoppingCartList) {
+            List<GoodsWithNumber> goodsWithNumberList = shopWithGoodsListMap.get(shoppingCart.getShopId());
+            if (goodsWithNumberList == null) {
+                shopWithGoodsListMap.put(shoppingCart.getShopId(), Collections.singletonList(getGoodsWithNumberFromGoodsIdAndNumber(shoppingCart.getGoodsId(), shoppingCart.getNumber())));
+            } else {
+                goodsWithNumberList.add(getGoodsWithNumberFromGoodsIdAndNumber(shoppingCart.getGoodsId(), shoppingCart.getNumber()));
+                shopWithGoodsListMap.put(shoppingCart.getShopId(), goodsWithNumberList);
+            }
+        }
+        return shopWithGoodsListMap;
+    }
+
+
+    private GoodsWithNumber getGoodsWithNumberFromGoodsIdAndNumber(Long goodsId, Integer number) {
+        Goods queryGoodsFromDatabase = goodsMapper.selectByPrimaryKey(goodsId);
+        if (queryGoodsFromDatabase == null || DataStatus.DELETED.getStatus().equals(queryGoodsFromDatabase.getStatus())) {
+            throw HttpException.notFound("商品未找到！goodsId：" + goodsId);
+        }
+        return convertGoodsWithNumberFromGoodsAndNumber(queryGoodsFromDatabase, number);
+    }
+
+
+    private ShoppingCart convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(AddToShoppingCartGoods addToShoppingCartGoods, long shopId, long userId) {
+        GoodsWithNumber goodsWithNumber = getGoodsWithNumberFromGoodsIdAndNumber(addToShoppingCartGoods.getId(), addToShoppingCartGoods.getNumber());
+        return convertToShoppingCartFromGoodsWithNumber(goodsWithNumber, shopId, userId);
+    }
+
+    private List<GoodsWithNumber> getGoodsWithNumberListByShopIdAndUserId(long shopId, long userId) {
+        ShoppingCartExample example = new ShoppingCartExample();
+        example.createCriteria().andShopIdEqualTo(shopId).andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus());
+        return shoppingCartMapper.selectByExample(example).stream()
+                .map(shoppingCart -> getGoodsWithNumberFromGoodsIdAndNumber(shoppingCart.getGoodsId(), shoppingCart.getNumber()))
+                .collect(Collectors.toList());
+    }
+
+    private ShoppingCartData convertGoodsWithNumberListToShoppingCartResponse(List<GoodsWithNumber> goodsWithNumberList) {
+        Shop shop = shopMapper.selectByPrimaryKey(goodsWithNumberList.get(0).getShopId());
+        return ShoppingCartData.of(shop, goodsWithNumberList);
+    }
+
+    /*
+     * 1. delete item by goodsId and userId
+     * 2. get ShoppingCartResponse by shopId and userId
+     */
+    public ShoppingCartData deleteGoodsInShoppingCart(long goodsId, Long userId) {
         ShoppingCartExample example = new ShoppingCartExample();
         example.createCriteria().andGoodsIdEqualTo(goodsId).andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus());
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectByExample(example);
@@ -142,53 +145,71 @@ public class ShoppingCartService {
         customShoppingCartMapper.batchDelete(shoppingCartList);
 
         Long shopId = shoppingCartList.get(0).getShopId();
-        ShoppingCartExample responseExample = new ShoppingCartExample();
-        responseExample.createCriteria().andShopIdEqualTo(shopId).andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus());
-        List<ShoppingCart> shoppingCarts = shoppingCartMapper.selectByExample(example);
-
         Shop shop = shopMapper.selectByPrimaryKey(shopId);
-        List<GoodsWithNumber> goodsWithNumberList = shoppingCarts.stream()
-                .map(shoppingCart -> extracted(shoppingCart.getGoodsId(), shoppingCart.getNumber()))
+
+        return ShoppingCartData.of(shop, getGoodsWithNumberListByShopIdAndUserId(shopId, userId));
+    }
+
+    /*
+     * 如果该商品在购物车中则更新，如果不在则新增
+     * 此处认为所有商品来自一个店铺
+     *
+     * 1. get shoppingCartList by goodsIdList and userId
+     * 2. get shop by shopId
+     * 3. get pending update list
+     * 4. get pending insert list
+     * 5. get ShoppingCartResponse by shopId and userId
+     */
+    public ShoppingCartData addGoodsListToShoppingCart(List<AddToShoppingCartGoods> addToShoppingCartGoodsList, Long userId) {
+        // 获取数据库已有的购物车商品
+        List<Long> goodsIdList = addToShoppingCartGoodsList.stream().distinct().map(AddToShoppingCartGoods::getId).collect(Collectors.toList());
+        ShoppingCartExample goodsIdListExample = new ShoppingCartExample();
+        goodsIdListExample.createCriteria().andGoodsIdIn(goodsIdList).andUserIdEqualTo(userId);
+        List<ShoppingCart> goodsListOfShoppingCartOfAlreadyInDatabase = shoppingCartMapper.selectByExample(goodsIdListExample);
+
+        Shop shop = shopMapper.selectByPrimaryKey(goodsListOfShoppingCartOfAlreadyInDatabase.get(0).getShopId());
+        if (shop == null || DataStatus.DELETED.getStatus().equals(shop.getStatus())) {
+            throw HttpException.notFound("店铺未找到！shopId：" + goodsListOfShoppingCartOfAlreadyInDatabase.get(0).getShopId());
+        }
+
+        // insert
+        List<ShoppingCart> shoppingCartListOfPendingInsert = addToShoppingCartGoodsList.stream()
+                .filter(goodsOfPendingInsertToDatabase -> isGoodsIdNotInList(goodsOfPendingInsertToDatabase.getId(), goodsListOfShoppingCartOfAlreadyInDatabase))
+                .map(goodsOfPendingInsertToDatabase -> convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(goodsOfPendingInsertToDatabase, shop.getId(), userId))
                 .collect(Collectors.toList());
 
-        return ShoppingCartResponse.of(shop, goodsWithNumberList);
-    }
-
-    private GoodsWithNumber extracted(Long goodsId, Integer number) {
-        Goods queryGoodsFromDatabase = goodsMapper.selectByPrimaryKey(goodsId);
-        if (queryGoodsFromDatabase == null || DataStatus.DELETED.getStatus().equals(queryGoodsFromDatabase.getStatus())) {
-            throw HttpException.notFound("商品未找到！goodsId" + goodsId);
+        // update
+        for (ShoppingCart existGoods : goodsListOfShoppingCartOfAlreadyInDatabase) {
+            existGoods.setNumber(Objects.requireNonNull(includeGoodsInList(existGoods.getGoodsId(), addToShoppingCartGoodsList)).getNumber());
         }
-        return generateGoodsWithNumber(queryGoodsFromDatabase, number);
+
+        customShoppingCartMapper.batchUpdate(goodsListOfShoppingCartOfAlreadyInDatabase);
+        customShoppingCartMapper.batchInsert(shoppingCartListOfPendingInsert);
+
+        return ShoppingCartData.of(shop, getGoodsWithNumberListByShopIdAndUserId(shop.getId(), userId));
     }
 
-    public List<ShoppingCartResponse> getGoodsWithPageFromShoppingCart(int pageNum, int pageSize, Long userId) {
+
+    /*
+     * 按照店铺分页
+     */
+    public ResponseWithPages<List<ShoppingCartData>> getGoodsWithPageFromShoppingCart(int pageNum, int pageSize, Long userId) {
+        // 分页获取所有的 shopId
+        List<Long> shopIdList = customShoppingCartMapper.getShopListFromShoppingCartWithPage(userId, (pageNum - 1) * pageSize, pageSize);
+
+        // 获取所有的 shoppingCart
         ShoppingCartExample example = new ShoppingCartExample();
-        example.createCriteria().andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus());
-        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectByExampleWithRowbounds(example, new RowBounds((pageNum - 1) * pageSize, pageSize));
+        example.createCriteria().andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus()).andShopIdIn(shopIdList);
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectByExample(example);
+
+        // shoppingCart (shopId, goodsId, number)  => List<ShoppingCartData>
         Map<Long, List<GoodsWithNumber>> shopWithGoodsListMap = getShopIdMapGoodsWithNumberList(shoppingCartList);
-        return shopWithGoodsListMap.values().stream()
+        List<ShoppingCartData> shoppingCartResponseList = shopWithGoodsListMap.values().stream()
                 .map(this::convertGoodsWithNumberListToShoppingCartResponse)
                 .collect(Collectors.toList());
-    }
 
-    private Map<Long, List<GoodsWithNumber>> getShopIdMapGoodsWithNumberList(List<ShoppingCart> shoppingCartList) {
-        // TODO: stream
-        Map<Long, List<GoodsWithNumber>> shopWithGoodsListMap = new ConcurrentHashMap<>();
-        for (ShoppingCart shoppingCart : shoppingCartList) {
-            List<GoodsWithNumber> goodsWithNumberList = shopWithGoodsListMap.get(shoppingCart.getShopId());
-            if (goodsWithNumberList == null) {
-                shopWithGoodsListMap.put(shoppingCart.getShopId(), Collections.singletonList(extracted(shoppingCart.getGoodsId(), shoppingCart.getNumber())));
-            } else {
-                goodsWithNumberList.add(extracted(shoppingCart.getGoodsId(), shoppingCart.getNumber()));
-                shopWithGoodsListMap.put(shoppingCart.getShopId(), goodsWithNumberList);
-            }
-        }
-        return shopWithGoodsListMap;
-    }
-
-    private ShoppingCartResponse convertGoodsWithNumberListToShoppingCartResponse(List<GoodsWithNumber> goodsWithNumberList) {
-        Shop shop = shopMapper.selectByPrimaryKey(goodsWithNumberList.get(0).getShopId());
-        return ShoppingCartResponse.of(shop, goodsWithNumberList);
+        int total = customShoppingCartMapper.getTotal(userId);
+        int totalPage = total % pageSize == 0 ? total / pageSize : total / pageSize + 1;
+        return ResponseWithPages.response(pageNum, pageSize, totalPage, shoppingCartResponseList);
     }
 }

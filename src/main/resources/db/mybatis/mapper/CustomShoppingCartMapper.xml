@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bowen.shop.generate.CustomShoppingCartMapper">
+<mapper namespace="com.bowen.shop.dao.CustomShoppingCartMapper">
     <insert id="batchInsert" parameterType="List">
         INSERT INTO SHOPPING_CART
         (SHOP_ID, GOODS_ID, USER_ID, NUMBER, STATUS, CREATED_AT, UPDATED_AT)
@@ -23,4 +23,33 @@
             where ID = #{ID}
         </foreach>
     </update>
+
+    <select id="getTotal" parameterType="long" resultType="int">
+        select count(distinct SHOP_ID)
+        from SHOPPING_CART
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="getShopListFromShoppingCartWithPage" parameterType="Map" resultType="java.lang.Long">
+        select distinct SHOP_ID
+        from SHOPPING_CART
+        where USER_ID = #{userId}
+          and STATUS = 'ok'
+            limit #{offset}
+            , #{limit}
+    </select>
+
+    <select id="selectShoppingCartDataByUserId" resultType="Map" parameterType="Map">
+        -- TODO
+        SELECT t.SHOP_ID, GOODS_ID, NAME, NUMBER
+        FROM (
+                 SELECT DISTINCT SHOP_ID
+                 FROM SHOPPING_CART
+                 WHERE USER_ID = #{userId}
+                   AND STATUS = 'ok' LIMIT #{offset}
+                     , #{limit}) t
+                 JOIN SHOPPING_CART ON SHOPPING_CART.SHOP_ID = t.SHOP_ID
+                 JOIN GOODS ON SHOPPING_CART.GOODS_ID = GOODS.ID
+                 JOIN SHOP ON SHOPPING_CART.SHOP_ID = SHOP.ID
+    </select>
 </mapper>
