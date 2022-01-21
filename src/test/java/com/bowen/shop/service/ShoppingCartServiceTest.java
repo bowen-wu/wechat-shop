@@ -170,7 +170,7 @@ class ShoppingCartServiceTest {
         assertEquals(testShopId, shoppingCartData.getShop().getId());
         assertEquals(1, shoppingCartData.getGoodsWithNumberList().size());
         assertEquals(Collections.singletonList(1L), shoppingCartData.getGoodsWithNumberList().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
-        assertEquals(Collections.singletonList(2), shoppingCartData.getGoodsWithNumberList().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
+        assertEquals(Collections.singletonList(3), shoppingCartData.getGoodsWithNumberList().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
     }
 
     @Test

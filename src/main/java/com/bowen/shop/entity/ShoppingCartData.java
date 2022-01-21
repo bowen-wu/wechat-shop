@@ -10,6 +10,9 @@ public class ShoppingCartData {
     private Shop shop;
     private List<GoodsWithNumber> goodsWithNumberList;
 
+    public ShoppingCartData() {
+    }
+
     public static ShoppingCartData of(Shop shop, List<GoodsWithNumber> goodsWithNumberList) {
         return new ShoppingCartData(shop, goodsWithNumberList);
     }

@@ -45,9 +45,15 @@ public class ShoppingCartService {
         this.customShoppingCartMapper = customShoppingCartMapper;
     }
 
-    private AddToShoppingCartGoods includeGoodsInList(long goodsId, List<AddToShoppingCartGoods> addToShoppingCartGoodsList) {
+    private AddToShoppingCartGoods includeGoodsInList(ShoppingCart shoppingCartInDatabase, List<AddToShoppingCartGoods> addToShoppingCartGoodsList) {
         List<AddToShoppingCartGoods> goodsSingleList = addToShoppingCartGoodsList.stream()
-                .filter(item -> item.getId() == goodsId)
+                .filter(item -> item.getId() == shoppingCartInDatabase.getGoodsId())
+                .map(item -> {
+                    if (item.getId() == shoppingCartInDatabase.getGoodsId()) {
+                        item.setNumber(item.getNumber() + shoppingCartInDatabase.getNumber());
+                    }
+                    return item;
+                })
                 .collect(Collectors.toList());
         if (goodsSingleList.size() <= 0) {
             return null;
@@ -139,7 +145,7 @@ public class ShoppingCartService {
         ShoppingCartExample example = new ShoppingCartExample();
         example.createCriteria().andGoodsIdEqualTo(goodsId).andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus());
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectByExample(example);
-        if (shoppingCartList.size() == 0) {
+        if (shoppingCartList.isEmpty()) {
             throw HttpException.notFound("商品未找到！goodsId：" + goodsId);
         }
         customShoppingCartMapper.batchDelete(shoppingCartList);
@@ -167,9 +173,21 @@ public class ShoppingCartService {
         goodsIdListExample.createCriteria().andGoodsIdIn(goodsIdList).andUserIdEqualTo(userId);
         List<ShoppingCart> goodsListOfShoppingCartOfAlreadyInDatabase = shoppingCartMapper.selectByExample(goodsIdListExample);
 
-        Shop shop = shopMapper.selectByPrimaryKey(goodsListOfShoppingCartOfAlreadyInDatabase.get(0).getShopId());
+        long shopId;
+        if (goodsListOfShoppingCartOfAlreadyInDatabase.isEmpty()) {
+            Goods goods = goodsMapper.selectByPrimaryKey(goodsIdList.get(0));
+            if (goods == null || DataStatus.DELETED.getStatus().equals(goods.getStatus())) {
+                throw HttpException.notFound("商品未找到！goodsId：" + goodsIdList.get(0));
+            }
+            shopId = goods.getShopId();
+
+        } else {
+            shopId = goodsListOfShoppingCartOfAlreadyInDatabase.get(0).getShopId();
+        }
+
+        Shop shop = shopMapper.selectByPrimaryKey(shopId);
         if (shop == null || DataStatus.DELETED.getStatus().equals(shop.getStatus())) {
-            throw HttpException.notFound("店铺未找到！shopId：" + goodsListOfShoppingCartOfAlreadyInDatabase.get(0).getShopId());
+            throw HttpException.notFound("店铺未找到！shopId：" + shopId);
         }
 
         // insert
@@ -180,20 +198,25 @@ public class ShoppingCartService {
 
         // update
         for (ShoppingCart existGoods : goodsListOfShoppingCartOfAlreadyInDatabase) {
-            existGoods.setNumber(Objects.requireNonNull(includeGoodsInList(existGoods.getGoodsId(), addToShoppingCartGoodsList)).getNumber());
+            existGoods.setNumber(Objects.requireNonNull(includeGoodsInList(existGoods, addToShoppingCartGoodsList)).getNumber());
         }
 
-        customShoppingCartMapper.batchUpdate(goodsListOfShoppingCartOfAlreadyInDatabase);
-        customShoppingCartMapper.batchInsert(shoppingCartListOfPendingInsert);
+        if (!goodsListOfShoppingCartOfAlreadyInDatabase.isEmpty()) {
+            customShoppingCartMapper.batchUpdate(goodsListOfShoppingCartOfAlreadyInDatabase);
+        }
+        if (!shoppingCartListOfPendingInsert.isEmpty()) {
+            customShoppingCartMapper.batchInsert(shoppingCartListOfPendingInsert);
+        }
 
-        return ShoppingCartData.of(shop, getGoodsWithNumberListByShopIdAndUserId(shop.getId(), userId));
+        return ShoppingCartData.of(shop, getGoodsWithNumberListByShopIdAndUserId(shopId, userId));
     }
 
 
     /*
      * 按照店铺分页
      */
-    public ResponseWithPages<List<ShoppingCartData>> getGoodsWithPageFromShoppingCart(int pageNum, int pageSize, Long userId) {
+    public ResponseWithPages<List<ShoppingCartData>> getGoodsWithPageFromShoppingCart(int pageNum,
+                                                                                      int pageSize, Long userId) {
         // 分页获取所有的 shopId
         List<Long> shopIdList = customShoppingCartMapper.getShopListFromShoppingCartWithPage(userId, (pageNum - 1) * pageSize, pageSize);
 

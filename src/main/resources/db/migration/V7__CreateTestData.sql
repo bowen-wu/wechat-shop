@@ -14,7 +14,7 @@ VALUES ('安踏', '永不止步', 'http://url', 2, 'ok', NOW(), NOW());
 INSERT INTO SHOP (NAME, DESCRIPTION, IMG_URL, OWNER_USER_ID, STATUS, CREATED_AT, UPDATED_AT)
 VALUES ('FILA', '永不止步', 'http://url', 2, 'ok', NOW(), NOW());
 INSERT INTO SHOP (NAME, DESCRIPTION, IMG_URL, OWNER_USER_ID, STATUS, CREATED_AT, UPDATED_AT)
-VALUES ('乔丹体育', '乔丹体育', 'http://url', 2, 'fail', NOW(), NOW());
+VALUES ('乔丹体育', '乔丹体育', 'http://url', 2, 'deleted', NOW(), NOW());
 
 INSERT INTO GOODS (SHOP_ID, NAME, DESCRIPTION, DETAILS, IMAGE_URL, PRICE, STOCK, STATUS, CREATED_AT, UPDATED_AT)
 VALUES (1, '上衣', 'This is beautiful t-shirt!', 'This is T-shirt details', 'http://url', 1000, 10, 'ok', NOW(), NOW());
@@ -29,6 +29,9 @@ VALUES (3, '裤子', 'This is beautiful pants!', 'This is pants details', 'http:
 INSERT INTO GOODS (SHOP_ID, NAME, DESCRIPTION, DETAILS, IMAGE_URL, PRICE, STOCK, STATUS, CREATED_AT, UPDATED_AT)
 VALUES (4, '速干衣', 'This is beautiful Quick-drying clothes!', 'This is Quick-drying clothes details', 'http://url', 2000,
         10, 'ok', NOW(), NOW());
+INSERT INTO GOODS (SHOP_ID, NAME, DESCRIPTION, DETAILS, IMAGE_URL, PRICE, STOCK, STATUS, CREATED_AT, UPDATED_AT)
+VALUES (5, '速干衣', 'This is beautiful Quick-drying clothes!', 'This is Quick-drying clothes details', 'http://url', 20,
+        1, 'ok', NOW(), NOW());
 
 INSERT INTO `ORDER` (USER_ID, TOTAL_PRICE, ADDRESS, EXPRESS_COMPANY, EXPRESS_ID, STATUS, CREATED_AT, UPDATED_AT)
 VALUES (1, 1000, 'address', '顺丰', '1', 'ok', NOW(), NOW());

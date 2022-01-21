@@ -265,5 +265,4 @@ public class ShoppingCartController {
             return Response.fail(e.getMessage());
         }
     }
-
 }

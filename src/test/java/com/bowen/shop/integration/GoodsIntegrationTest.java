@@ -205,7 +205,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
                 assertEquals(2, res.getPageNum());
                 assertEquals(4, res.getPageSize());
                 assertEquals(2, res.getTotalPage());
-                assertEquals(3, res.getData().size());
+                assertEquals(4, res.getData().size());
             }
         }
     }

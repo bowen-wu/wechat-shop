@@ -10,19 +10,22 @@
         </foreach>
     </insert>
 
-    <update id="batchUpdate" parameterType="List">
-        UPDATE SHOPPING_CART
-        <foreach collection="list" item="com.bowen.shop.generate.ShoppingCart" separator=",">
-            NUMBER = #{number}, UPDATED_AT = #{updatedAt} where ID = #{ID}
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="shoppingCartList" item="shoppingCart" separator=",">
+            UPDATE SHOPPING_CART
+            <set>
+                NUMBER = #{shoppingCart.number}, UPDATED_AT = #{shoppingCart.updatedAt}
+            </set>
+            where ID = #{shoppingCart.id}
         </foreach>
     </update>
 
-    <update id="batchDelete" parameterType="List">
+    <delete id="batchDelete" parameterType="List">
         DELETE FROM SHOPPING_CART
-        <foreach collection="list" item="com.bowen.shop.generate.ShoppingCart" separator=",">
-            where ID = #{ID}
+        <foreach collection="shoppingCartList" item="shoppingCart" separator=",">
+            WhERE ID = #{shoppingCart.id}
         </foreach>
-    </update>
+    </delete>
 
     <select id="getTotal" parameterType="long" resultType="int">
         select count(distinct SHOP_ID)
