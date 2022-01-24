@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: test-shop
   datasource:
     url: jdbc:mysql://localhost:3307/shop
     username: root
@@ -6,3 +8,16 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
 mybatis:
   config-location: classpath:db/mybatis/config.xml
+
+shop:
+  orderservice:
+    version: 1.0.0
+    url: dubbo://127.0.0.1:12345
+
+# 告知测试 rpc 服务去哪里找
+dubbo:
+  scan:
+    base-packages: com.bowen.shop.mock
+  protocol:
+    name: dubbo
+    port: 12345

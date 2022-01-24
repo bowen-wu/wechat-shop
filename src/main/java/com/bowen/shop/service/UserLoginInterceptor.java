@@ -22,6 +22,7 @@ public class UserLoginInterceptor implements HandlerInterceptor {
         whiteList.add("/api/v1/code");
         whiteList.add("/api/v1/login");
         whiteList.add("/api/v1/status");
+        whiteList.add("/api/v1/testRpc");
     }
 
     @Override

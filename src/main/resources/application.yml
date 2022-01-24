@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: shop
   datasource:
     url: jdbc:mysql://10.40.95.56:3306/shop
     username: root
@@ -6,3 +8,17 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
 mybatis:
   config-location: classpath:db/mybatis/config.xml
+
+
+embedded:
+  zookeeper:
+    port: 2181
+
+shop:
+  orderservice:
+    version: 1.0.0
+    url: ""
+
+dubbo:
+  registry:
+    address: zookeeper://127.0.0.1:${embedded.zookeeper.port}

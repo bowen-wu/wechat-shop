@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = WechatShopApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:test-application.yml")
+@TestPropertySource(properties = {"spring.config.location=classpath:test-application.yml"})
 public class AuthIntegrationTest extends AbstractIntegrationTest {
     public void return401WhenAccessDenied() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
