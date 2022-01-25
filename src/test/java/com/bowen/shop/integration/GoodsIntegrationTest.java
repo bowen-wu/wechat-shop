@@ -164,7 +164,6 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
                 .build()) {
             login(httpclient);
 
-            assertHttpException(httpclient, Method.GET, "/api/v1/goods/", null, HTTP_BAD_REQUEST, "");
             assertHttpException(httpclient, Method.GET, "/api/v1/goods/99", null, HTTP_NOT_FOUND, "商品不存在！");
         }
     }
