@@ -1,8 +1,16 @@
+embedded:
+  baseUrl:
+    ip: 127.0.0.1
+  zookeeper:
+    port: 12345
+  redis:
+    port: 6380
+
 spring:
   application:
     name: test-shop
   datasource:
-    url: jdbc:mysql://localhost:3307/shop
+    url: jdbc:mysql://${embedded.baseUrl.ip}:3307/shop
     username: root
     password: my-secret-pw
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -12,7 +20,11 @@ mybatis:
 shop:
   orderservice:
     version: 1.0.0
-    url: dubbo://127.0.0.1:12345
+    url: dubbo://${embedded.baseUrl.ip}:${embedded.zookeeper.port}
+  redis:
+    host: ${embedded.baseUrl.ip}
+    port: ${embedded.redis.port}
+
 
 # 告知测试 rpc 服务去哪里找
 dubbo:
@@ -20,4 +32,4 @@ dubbo:
     base-packages: com.bowen.shop.mock
   protocol:
     name: dubbo
-    port: 12345
+    port: ${embedded.zookeeper.port}

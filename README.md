@@ -61,8 +61,16 @@
 
 1. apidoc => 接口文档
 
-
 ## 知识点
+
 1. ` insert ` 之后自动设置了 entity 的 id
+
+## 注意
+
+1. 在 IDEA 中运行测试时，需要启动本地的 MySQL 和 Redis
+   ```
+   docker run --name wechat-shop-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -e MYSQL_shop -p 3307:3306 -d mysql:8 
+   docker run --name wechat-shop-reids -p 6380:6379 -d redis
+   ```
 
 
