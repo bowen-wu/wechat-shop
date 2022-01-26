@@ -1,6 +1,6 @@
 package com.bowen.shop.controller;
 
-import com.bowen.shop.entity.AddToShoppingCartGoods;
+import com.bowen.shop.entity.GoodsIdAndNumber;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.Pages;
 import com.bowen.shop.entity.Response;
@@ -182,19 +182,19 @@ public class ShoppingCartController {
     /**
      * 加商品到购物车中
      *
-     * @param addToShoppingCartGoodsList 加入到购物车的商品列表
-     * @param response                   response
+     * @param goodsIdAndNumberList 加入到购物车的商品列表
+     * @param response             response
      * @return 该店铺在购物车中的所有商品
      */
     @PostMapping("/shoppingCart")
-    public Response<ShoppingCartData> addGoodsListToShoppingCart(@RequestBody List<AddToShoppingCartGoods> addToShoppingCartGoodsList,
+    public Response<ShoppingCartData> addGoodsListToShoppingCart(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList,
                                                                  HttpServletResponse response) {
-        if (addToShoppingCartGoodsList.stream().anyMatch(addToShoppingCartGoods -> addToShoppingCartGoods.getNumber() <= 0)) {
+        if (goodsIdAndNumberList.stream().anyMatch(addToShoppingCartGoods -> addToShoppingCartGoods.getNumber() <= 0)) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             return Response.fail("请求参数错误！");
         }
         try {
-            return Response.success(shoppingCartService.addGoodsListToShoppingCart(addToShoppingCartGoodsList, UserContext.getCurrentUser().getId()));
+            return Response.success(shoppingCartService.addGoodsListToShoppingCart(goodsIdAndNumberList, UserContext.getCurrentUser().getId()));
         } catch (HttpException e) {
             response.setStatus(e.getStatusCode());
             return Response.fail(e.getMessage());

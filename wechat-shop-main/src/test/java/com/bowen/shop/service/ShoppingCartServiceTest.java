@@ -1,7 +1,7 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.dao.CustomShoppingCartMapper;
-import com.bowen.shop.entity.AddToShoppingCartGoods;
+import com.bowen.shop.entity.GoodsIdAndNumber;
 import com.bowen.shop.entity.DataStatus;
 import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -81,11 +81,11 @@ class ShoppingCartServiceTest {
     @Test
     public void returnNotFoundWhenAddGoodsListToShoppingCart() {
         long testShopId = 2L;
-        List<AddToShoppingCartGoods> testAddToShoppingCartGoodsList = new ArrayList<>();
-        AddToShoppingCartGoods addToShoppingCartGoods1 = new AddToShoppingCartGoods(2, 1L);
-        AddToShoppingCartGoods addToShoppingCartGoods2 = new AddToShoppingCartGoods(3, 2L);
-        testAddToShoppingCartGoodsList.add(addToShoppingCartGoods1);
-        testAddToShoppingCartGoodsList.add(addToShoppingCartGoods2);
+        List<GoodsIdAndNumber> testGoodsIdAndNumberList = new ArrayList<>();
+        GoodsIdAndNumber goodsIdAndNumber1 = new GoodsIdAndNumber(2, 1L);
+        GoodsIdAndNumber goodsIdAndNumber2 = new GoodsIdAndNumber(3, 2L);
+        testGoodsIdAndNumberList.add(goodsIdAndNumber1);
+        testGoodsIdAndNumberList.add(goodsIdAndNumber2);
 
         List<ShoppingCart> goodsListOfShoppingCartOfAlreadyInDatabase = new ArrayList<>();
         ShoppingCart testShoppingCart = new ShoppingCart();
@@ -98,7 +98,7 @@ class ShoppingCartServiceTest {
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(null);
 
         TestHelper.assertHttpException(
-                () -> shoppingCartService.addGoodsListToShoppingCart(testAddToShoppingCartGoodsList, 1L),
+                () -> shoppingCartService.addGoodsListToShoppingCart(testGoodsIdAndNumberList, 1L),
                 HttpStatus.NOT_FOUND,
                 "店铺未找到！shopId：2");
 
@@ -108,7 +108,7 @@ class ShoppingCartServiceTest {
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
 
         TestHelper.assertHttpException(
-                () -> shoppingCartService.addGoodsListToShoppingCart(testAddToShoppingCartGoodsList, 1L),
+                () -> shoppingCartService.addGoodsListToShoppingCart(testGoodsIdAndNumberList, 1L),
                 HttpStatus.NOT_FOUND,
                 "店铺未找到！shopId：2");
 
@@ -117,7 +117,7 @@ class ShoppingCartServiceTest {
         when(goodsMapper.selectByPrimaryKey(2L)).thenReturn(null);
 
         TestHelper.assertHttpException(
-                () -> shoppingCartService.addGoodsListToShoppingCart(testAddToShoppingCartGoodsList, 1L),
+                () -> shoppingCartService.addGoodsListToShoppingCart(testGoodsIdAndNumberList, 1L),
                 HttpStatus.NOT_FOUND,
                 "商品未找到！goodsId：2");
 
@@ -126,7 +126,7 @@ class ShoppingCartServiceTest {
         testGoods.setStatus(DataStatus.DELETED.getStatus());
         when(goodsMapper.selectByPrimaryKey(2L)).thenReturn(testGoods);
         TestHelper.assertHttpException(
-                () -> shoppingCartService.addGoodsListToShoppingCart(testAddToShoppingCartGoodsList, 1L),
+                () -> shoppingCartService.addGoodsListToShoppingCart(testGoodsIdAndNumberList, 1L),
                 HttpStatus.NOT_FOUND,
                 "商品未找到！goodsId：2");
     }
@@ -157,13 +157,13 @@ class ShoppingCartServiceTest {
         testGoods1.setStatus(DataStatus.OK.getStatus());
         when(goodsMapper.selectByPrimaryKey(1L)).thenReturn(testGoods1);
 
-        List<AddToShoppingCartGoods> testAddToShoppingCartGoodsList = new ArrayList<>();
-        AddToShoppingCartGoods addToShoppingCartGoods1 = new AddToShoppingCartGoods(2, 1L);
-        AddToShoppingCartGoods addToShoppingCartGoods2 = new AddToShoppingCartGoods(3, 2L);
-        testAddToShoppingCartGoodsList.add(addToShoppingCartGoods1);
-        testAddToShoppingCartGoodsList.add(addToShoppingCartGoods2);
+        List<GoodsIdAndNumber> testGoodsIdAndNumberList = new ArrayList<>();
+        GoodsIdAndNumber goodsIdAndNumber1 = new GoodsIdAndNumber(2, 1L);
+        GoodsIdAndNumber goodsIdAndNumber2 = new GoodsIdAndNumber(3, 2L);
+        testGoodsIdAndNumberList.add(goodsIdAndNumber1);
+        testGoodsIdAndNumberList.add(goodsIdAndNumber2);
 
-        ShoppingCartData shoppingCartData = shoppingCartService.addGoodsListToShoppingCart(testAddToShoppingCartGoodsList, 1L);
+        ShoppingCartData shoppingCartData = shoppingCartService.addGoodsListToShoppingCart(testGoodsIdAndNumberList, 1L);
 
         // TODO: verify customShoppingCartMapper.batchInsert has been called
         verify(customShoppingCartMapper).batchUpdate(goodsListOfShoppingCartOfAlreadyInDatabase);

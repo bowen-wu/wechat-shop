@@ -1,10 +1,10 @@
 package com.bowen.shop.entity;
 
-public class AddToShoppingCartGoods {
+public class GoodsIdAndNumber {
     private int number;
     private long id;
 
-    public AddToShoppingCartGoods(int number, long id) {
+    public GoodsIdAndNumber(int number, long id) {
         this.number = number;
         this.id = id;
     }

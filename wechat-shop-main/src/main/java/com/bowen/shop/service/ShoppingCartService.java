@@ -1,7 +1,7 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.dao.CustomShoppingCartMapper;
-import com.bowen.shop.entity.AddToShoppingCartGoods;
+import com.bowen.shop.entity.GoodsIdAndNumber;
 import com.bowen.shop.entity.DataStatus;
 import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.HttpException;
@@ -45,8 +45,8 @@ public class ShoppingCartService {
         this.customShoppingCartMapper = customShoppingCartMapper;
     }
 
-    private AddToShoppingCartGoods includeGoodsInList(ShoppingCart shoppingCartInDatabase, List<AddToShoppingCartGoods> addToShoppingCartGoodsList) {
-        List<AddToShoppingCartGoods> goodsSingleList = addToShoppingCartGoodsList.stream()
+    private GoodsIdAndNumber includeGoodsInList(ShoppingCart shoppingCartInDatabase, List<GoodsIdAndNumber> goodsIdAndNumberList) {
+        List<GoodsIdAndNumber> goodsSingleList = goodsIdAndNumberList.stream()
                 .filter(item -> item.getId() == shoppingCartInDatabase.getGoodsId())
                 .map(item -> {
                     if (item.getId() == shoppingCartInDatabase.getGoodsId()) {
@@ -119,8 +119,8 @@ public class ShoppingCartService {
     }
 
 
-    private ShoppingCart convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(AddToShoppingCartGoods addToShoppingCartGoods, long shopId, long userId) {
-        GoodsWithNumber goodsWithNumber = getGoodsWithNumberFromGoodsIdAndNumber(addToShoppingCartGoods.getId(), addToShoppingCartGoods.getNumber());
+    private ShoppingCart convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(GoodsIdAndNumber goodsIdAndNumber, long shopId, long userId) {
+        GoodsWithNumber goodsWithNumber = getGoodsWithNumberFromGoodsIdAndNumber(goodsIdAndNumber.getId(), goodsIdAndNumber.getNumber());
         return convertToShoppingCartFromGoodsWithNumber(goodsWithNumber, shopId, userId);
     }
 
@@ -166,9 +166,9 @@ public class ShoppingCartService {
      * 4. get pending insert list
      * 5. get ShoppingCartResponse by shopId and userId
      */
-    public ShoppingCartData addGoodsListToShoppingCart(List<AddToShoppingCartGoods> addToShoppingCartGoodsList, Long userId) {
+    public ShoppingCartData addGoodsListToShoppingCart(List<GoodsIdAndNumber> goodsIdAndNumberList, Long userId) {
         // 获取数据库已有的购物车商品
-        List<Long> goodsIdList = addToShoppingCartGoodsList.stream().distinct().map(AddToShoppingCartGoods::getId).collect(Collectors.toList());
+        List<Long> goodsIdList = goodsIdAndNumberList.stream().distinct().map(GoodsIdAndNumber::getId).collect(Collectors.toList());
         ShoppingCartExample goodsIdListExample = new ShoppingCartExample();
         goodsIdListExample.createCriteria().andGoodsIdIn(goodsIdList).andUserIdEqualTo(userId);
         List<ShoppingCart> goodsListOfShoppingCartOfAlreadyInDatabase = shoppingCartMapper.selectByExample(goodsIdListExample);
@@ -191,14 +191,14 @@ public class ShoppingCartService {
         }
 
         // insert
-        List<ShoppingCart> shoppingCartListOfPendingInsert = addToShoppingCartGoodsList.stream()
+        List<ShoppingCart> shoppingCartListOfPendingInsert = goodsIdAndNumberList.stream()
                 .filter(goodsOfPendingInsertToDatabase -> isGoodsIdNotInList(goodsOfPendingInsertToDatabase.getId(), goodsListOfShoppingCartOfAlreadyInDatabase))
                 .map(goodsOfPendingInsertToDatabase -> convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(goodsOfPendingInsertToDatabase, shop.getId(), userId))
                 .collect(Collectors.toList());
 
         // update
         for (ShoppingCart existGoods : goodsListOfShoppingCartOfAlreadyInDatabase) {
-            existGoods.setNumber(Objects.requireNonNull(includeGoodsInList(existGoods, addToShoppingCartGoodsList)).getNumber());
+            existGoods.setNumber(Objects.requireNonNull(includeGoodsInList(existGoods, goodsIdAndNumberList)).getNumber());
         }
 
         if (!goodsListOfShoppingCartOfAlreadyInDatabase.isEmpty()) {

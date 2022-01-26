@@ -1,7 +1,7 @@
 package com.bowen.shop.integration;
 
 import com.bowen.shop.WechatShopApplication;
-import com.bowen.shop.entity.AddToShoppingCartGoods;
+import com.bowen.shop.entity.GoodsIdAndNumber;
 import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -113,7 +113,7 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                 .build()) {
             login(httpclient);
 
-            List<AddToShoppingCartGoods> goodsListPendingToShoppingCart = Collections.singletonList(new AddToShoppingCartGoods(0, 1));
+            List<GoodsIdAndNumber> goodsListPendingToShoppingCart = Collections.singletonList(new GoodsIdAndNumber(0, 1));
             assertHttpException(httpclient, Method.POST, "/api/v1/shoppingCart", goodsListPendingToShoppingCart, HTTP_BAD_REQUEST, "请求参数错误！");
         }
     }
@@ -126,14 +126,14 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                 .build()) {
             login(httpclient);
 
-            List<AddToShoppingCartGoods> goodsListPendingToShoppingCart = Collections.singletonList(new AddToShoppingCartGoods(1, 7));
+            List<GoodsIdAndNumber> goodsListPendingToShoppingCart = Collections.singletonList(new GoodsIdAndNumber(1, 7));
             assertHttpException(httpclient, Method.POST, "/api/v1/shoppingCart", goodsListPendingToShoppingCart, HTTP_NOT_FOUND, "店铺未找到！shopId：5");
 
             assertHttpException(
                     httpclient,
                     Method.POST,
                     "/api/v1/shoppingCart",
-                    Collections.singletonList(new AddToShoppingCartGoods(1, 999)),
+                    Collections.singletonList(new GoodsIdAndNumber(1, 999)),
                     HTTP_NOT_FOUND,
                     "商品未找到！goodsId：999");
         }
@@ -147,7 +147,7 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                 .build()) {
             login(httpclient);
 
-            List<AddToShoppingCartGoods> goodsListPendingToShoppingCart = Collections.singletonList(new AddToShoppingCartGoods(1, 1));
+            List<GoodsIdAndNumber> goodsListPendingToShoppingCart = Collections.singletonList(new GoodsIdAndNumber(1, 1));
 
             ClassicHttpRequest addShoppingCartRequest = createRequestBuilder(Method.POST, "/api/v1/shoppingCart", goodsListPendingToShoppingCart);
             try (CloseableHttpResponse response = httpclient.execute(addShoppingCartRequest)) {
