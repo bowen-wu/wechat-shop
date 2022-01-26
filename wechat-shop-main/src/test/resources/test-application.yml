@@ -18,7 +18,7 @@ mybatis:
   config-location: classpath:db/mybatis/config.xml
 
 shop:
-  orderservice:
+  orderService:
     version: 1.0.0
     url: dubbo://${embedded.baseUrl.ip}:${embedded.zookeeper.port}
   redis:

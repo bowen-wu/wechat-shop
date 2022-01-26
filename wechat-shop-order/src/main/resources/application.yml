@@ -1,0 +1,25 @@
+embedded:
+  baseUrl:
+    ip: 10.40.95.56
+  zookeeper:
+    port: 2181
+
+spring:
+  application:
+    name: wechat-shop-order
+
+shop:
+  orderService:
+    version: 1.0.0
+
+dubbo:
+  scan:
+    base-packages: com.bowen.shop.order.service
+
+  protocol:
+    name: dubbo
+    ## Random port
+    port: -1
+  registry:
+    address: zookeeper://${embedded.baseUrl.ip}:${embedded.zookeeper.port}
+

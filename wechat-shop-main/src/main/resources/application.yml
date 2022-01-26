@@ -8,7 +8,7 @@ embedded:
 
 spring:
   application:
-    name: shop
+    name: wechat-shop-main
   datasource:
     url: jdbc:mysql://${embedded.baseUrl.ip}:3306/shop
     username: root
@@ -18,7 +18,7 @@ mybatis:
   config-location: classpath:db/mybatis/config.xml
 
 shop:
-  orderservice:
+  orderService:
     version: 1.0.0
     url: ""
   redis:

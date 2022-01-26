@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -43,38 +44,21 @@ public class ShiroConfig implements WebMvcConfigurer {
         registry.addInterceptor(new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-//                Object tel = SecurityUtils.getSubject().getPrincipal();
-//                if (tel != null) {
-//                    userService.getUserInfoByTel((String) tel).ifPresent(UserContext::setCurrentUser);
-//                    return true;
-//                }
-//                if (Arrays.asList(
-//                        "/api/v1/code",
-//                        "/api/v1/login",
-//                        "/api/v1/status",
-//                        "/api/v1/testRpc"
-//                ).contains(request.getRequestURI())) {
-//                    return true;
-//                }
-//                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-//                return false;
-
                 Object tel = SecurityUtils.getSubject().getPrincipal();
                 if (tel != null) {
-                    userService.getUserInfoByTel(tel.toString()).ifPresent(UserContext::setCurrentUser);
+                    userService.getUserInfoByTel((String) tel).ifPresent(UserContext::setCurrentUser);
                     return true;
-                } else if (Arrays.asList(
+                }
+                if (Arrays.asList(
                         "/api/v1/code",
                         "/api/v1/login",
                         "/api/v1/status",
-                        "/api/v1/logout",
-                        "/error"
+                        "/api/v1/testRpc"
                 ).contains(request.getRequestURI())) {
                     return true;
-                } else {
-                    response.setStatus(401);
-                    return false;
                 }
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                return false;
             }
 
             @Override
