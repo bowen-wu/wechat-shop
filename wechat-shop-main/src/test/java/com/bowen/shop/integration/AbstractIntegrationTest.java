@@ -2,7 +2,6 @@ package com.bowen.shop.integration;
 
 import com.bowen.shop.entity.LoginResponse;
 import com.bowen.shop.entity.TelAndCode;
-import com.bowen.shop.generate.User;
 import com.bowen.shop.service.TelVerificationServiceTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;

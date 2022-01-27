@@ -1,6 +1,5 @@
 package com.bowen.shop.entity;
 
-import com.bowen.shop.generate.User;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")

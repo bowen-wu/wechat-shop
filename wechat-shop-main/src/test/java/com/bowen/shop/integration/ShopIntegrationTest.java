@@ -4,8 +4,6 @@ import com.bowen.shop.WechatShopApplication;
 import com.bowen.shop.entity.DataStatus;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
-import com.bowen.shop.generate.Shop;
-import com.bowen.shop.generate.User;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;

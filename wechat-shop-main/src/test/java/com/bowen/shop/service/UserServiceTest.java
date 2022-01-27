@@ -1,7 +1,6 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.generate.User;
-import com.bowen.shop.generate.UserExample;
 import com.bowen.shop.generate.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

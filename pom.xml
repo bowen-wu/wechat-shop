@@ -18,6 +18,10 @@
         <java.version>1.8</java.version>
         <dubbo.version>3.0.5</dubbo.version>
         <rpc.api.version>0.0.1-SNAPSHOT</rpc.api.version>
+        <mybatis.version>2.2.0</mybatis.version>
+        <mybatis.generator.version>1.4.0</mybatis.generator.version>
+        <flyway.version>8.0.5</flyway.version>
+        <mysql.connector.version>8.0.27</mysql.connector.version>
     </properties>
     <repositories>
         <repository>
@@ -39,7 +43,6 @@
         <module>wechat-shop-api</module>
         <module>wechat-shop-order</module>
     </modules>
-
 
     <dependencyManagement>
         <dependencies>
@@ -65,6 +68,37 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.mybatis.generator</groupId>
+                    <artifactId>mybatis-generator-maven-plugin</artifactId>
+                    <version>${mybatis.generator.version}</version>
+                    <configuration>
+                        <overwrite>true</overwrite>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>mysql</groupId>
+                            <artifactId>mysql-connector-java</artifactId>
+                            <version>${mysql.connector.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-maven-plugin</artifactId>
+                    <version>${flyway.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

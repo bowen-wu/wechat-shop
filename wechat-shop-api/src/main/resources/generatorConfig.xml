@@ -4,12 +4,13 @@
         "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
 
 <generatorConfiguration>
-    <context id="wechatShop" targetRuntime="MyBatis3">
+    <context id="wechatShopOrder" targetRuntime="MyBatis3">
         <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
         <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"/>
         <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://10.40.95.56:3306/shop"
+                        connectionURL="jdbc:mysql://10.40.95.56:3306/order"
                         userId="root"
                         password="my-secret-pw">
         </jdbcConnection>
@@ -18,36 +19,26 @@
             <property name="forceBigDecimals" value="true"/>
         </javaTypeResolver>
 
-        <javaModelGenerator targetPackage="com.bowen.shop.generate" targetProject="wechat-shop-main/src/main/java">
+        <javaModelGenerator targetPackage="com.bowen.shop.api.generate" targetProject="wechat-shop-api/src/main/java">
             <property name="enableSubPackages" value="true"/>
             <property name="trimStrings" value="true"/>
         </javaModelGenerator>
 
-        <sqlMapGenerator targetPackage="db.mybatis.mapper" targetProject="wechat-shop-main/src/main/resources">
+        <sqlMapGenerator targetPackage="db.mybatis.mapper" targetProject="wechat-shop-api/src/main/resources">
             <property name="enableSubPackages" value="true"/>
         </sqlMapGenerator>
 
-        <javaClientGenerator type="XMLMAPPER" targetPackage="com.bowen.shop.generate"
-                             targetProject="wechat-shop-main/src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.bowen.shop.api.generate"
+                             targetProject="wechat-shop-api/src/main/java">
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
-        <table schema="shop" tableName="USER" domainObjectName="User">
+        <table schema="wechatShopOrder" tableName="ORDER" domainObjectName="Order">
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
         </table>
 
-        <table schema="shop" tableName="SHOP" domainObjectName="Shop">
-            <property name="useActualColumnNames" value="false"/>
-            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
-        </table>
-
-        <table schema="shop" tableName="GOODS" domainObjectName="Goods">
-            <property name="useActualColumnNames" value="false"/>
-            <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
-        </table>
-
-        <table schema="shop" tableName="SHOPPING_CART" domainObjectName="ShoppingCart">
+        <table schema="wechatShopOrder" tableName="ORDER_GOODS" domainObjectName="OrderGoods">
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="ID" sqlStatement="MySql" identity="true"/>
         </table>

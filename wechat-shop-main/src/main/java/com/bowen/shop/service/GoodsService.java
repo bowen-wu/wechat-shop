@@ -4,7 +4,6 @@ import com.bowen.shop.entity.DataStatus;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
-import com.bowen.shop.generate.GoodsExample;
 import com.bowen.shop.generate.GoodsMapper;
 import com.bowen.shop.generate.Shop;
 import com.bowen.shop.generate.ShopMapper;

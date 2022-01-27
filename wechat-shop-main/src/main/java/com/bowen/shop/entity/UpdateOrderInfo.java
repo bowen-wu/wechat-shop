@@ -1,6 +1,6 @@
 package com.bowen.shop.entity;
 
-abstract public class UpdateOrderInfo {
+public abstract class UpdateOrderInfo {
     private long orderId;
 
     public UpdateOrderInfo() {

@@ -1,9 +1,10 @@
 package com.bowen.shop.controller;
 
-import com.bowen.shop.api.rpc.OrderRpcService;
 import com.bowen.shop.entity.GoodsIdAndNumber;
 import com.bowen.shop.entity.UpdateOrderInfo;
-import org.apache.dubbo.config.annotation.DubboReference;
+import com.bowen.shop.service.OrderService;
+import com.bowen.shop.service.UserContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,18 +21,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class OrderController {
-    @DubboReference(
-            version = "${shop.orderService.version}",
-            url = "${shop.orderService.url}"
-    )
-    private OrderRpcService orderRpcService;
+    private OrderService orderService;
 
-    @GetMapping("/testRpc")
-    public void testRpc() {
-        System.out.println(111);
-        orderRpcService.sayHello("consumer");
+    @Autowired
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
-
 
     /**
      * @apiDefine ErrorResponse
@@ -114,7 +109,7 @@ public class OrderController {
      */
     @PostMapping("/order")
     public void placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList, HttpServletResponse response) {
-
+        orderService.placeOrder(goodsIdAndNumberList, UserContext.getCurrentUser().getId());
     }
 
     /**
