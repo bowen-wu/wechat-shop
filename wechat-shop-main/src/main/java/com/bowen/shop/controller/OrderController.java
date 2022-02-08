@@ -1,6 +1,9 @@
 package com.bowen.shop.controller;
 
-import com.bowen.shop.entity.GoodsIdAndNumber;
+import com.bowen.shop.api.entity.GoodsIdAndNumber;
+import com.bowen.shop.entity.HttpException;
+import com.bowen.shop.entity.OrderResponse;
+import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.UpdateOrderInfo;
 import com.bowen.shop.service.OrderService;
 import com.bowen.shop.service.UserContext;
@@ -108,8 +111,14 @@ public class OrderController {
      * @param response             response
      */
     @PostMapping("/order")
-    public void placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList, HttpServletResponse response) {
-        orderService.placeOrder(goodsIdAndNumberList, UserContext.getCurrentUser().getId());
+    public Response<OrderResponse> placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList, HttpServletResponse response) {
+        try {
+            OrderResponse orderResponse = orderService.placeOrder(goodsIdAndNumberList, UserContext.getCurrentUser().getId());
+            return Response.success(orderResponse);
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
+            return Response.fail(e.getMessage());
+        }
     }
 
     /**

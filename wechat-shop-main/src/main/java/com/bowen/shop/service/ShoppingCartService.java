@@ -1,8 +1,8 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.dao.CustomShoppingCartMapper;
-import com.bowen.shop.entity.GoodsIdAndNumber;
-import com.bowen.shop.entity.DataStatus;
+import com.bowen.shop.api.entity.GoodsIdAndNumber;
+import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -77,23 +77,6 @@ public class ShoppingCartService {
         return shoppingCart;
     }
 
-    private GoodsWithNumber convertGoodsWithNumberFromGoodsAndNumber(Goods goods, int number) {
-        GoodsWithNumber goodsWithNumber = new GoodsWithNumber();
-        goodsWithNumber.setNumber(number);
-        goodsWithNumber.setCreatedAt(goods.getCreatedAt());
-        goodsWithNumber.setDescription(goods.getDescription());
-        goodsWithNumber.setDetails(goods.getDetails());
-        goodsWithNumber.setId(goods.getId());
-        goodsWithNumber.setImageUrl(goods.getImageUrl());
-        goodsWithNumber.setName(goods.getName());
-        goodsWithNumber.setPrice(goods.getPrice());
-        goodsWithNumber.setStock(goods.getStock());
-        goodsWithNumber.setStatus(goods.getStatus());
-        goodsWithNumber.setShopId(goods.getShopId());
-        goodsWithNumber.setUpdatedAt(goods.getUpdatedAt());
-        return goodsWithNumber;
-    }
-
     private Map<Long, List<GoodsWithNumber>> getShopIdMapGoodsWithNumberList(List<ShoppingCart> shoppingCartList) {
         // TODO: stream
         Map<Long, List<GoodsWithNumber>> shopWithGoodsListMap = new ConcurrentHashMap<>();
@@ -109,13 +92,15 @@ public class ShoppingCartService {
         return shopWithGoodsListMap;
     }
 
-
-    private GoodsWithNumber getGoodsWithNumberFromGoodsIdAndNumber(Long goodsId, Integer number) {
+    public GoodsWithNumber getGoodsWithNumberFromGoodsIdAndNumber(Long goodsId, Integer number) {
         Goods queryGoodsFromDatabase = goodsMapper.selectByPrimaryKey(goodsId);
         if (queryGoodsFromDatabase == null || DataStatus.DELETED.getStatus().equals(queryGoodsFromDatabase.getStatus())) {
             throw HttpException.notFound("商品未找到！goodsId：" + goodsId);
         }
-        return convertGoodsWithNumberFromGoodsAndNumber(queryGoodsFromDatabase, number);
+
+        GoodsWithNumber goodsWithNumber = new GoodsWithNumber(queryGoodsFromDatabase);
+        goodsWithNumber.setNumber(number);
+        return goodsWithNumber;
     }
 
 

@@ -8,6 +8,20 @@ public class GoodsWithNumber extends Goods {
     public GoodsWithNumber() {
     }
 
+    public GoodsWithNumber(Goods goods) {
+        this.setCreatedAt(goods.getCreatedAt());
+        this.setDescription(goods.getDescription());
+        this.setDetails(goods.getDetails());
+        this.setId(goods.getId());
+        this.setImageUrl(goods.getImageUrl());
+        this.setName(goods.getName());
+        this.setPrice(goods.getPrice());
+        this.setStock(goods.getStock());
+        this.setStatus(goods.getStatus());
+        this.setShopId(goods.getShopId());
+        this.setUpdatedAt(goods.getUpdatedAt());
+    }
+
     public int getNumber() {
         return number;
     }

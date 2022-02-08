@@ -1,8 +1,14 @@
-package com.bowen.shop.entity;
+package com.bowen.shop.api.entity;
 
 public enum DataStatus {
     OK("ok"),
-    DELETED("deleted");
+    DELETED("deleted"),
+
+    // only for order
+    PENDING("pending"),
+    PAID("paid"),
+    DELIVERED("delivered"),
+    RECEIVED("received");
 
     private final String status;
 

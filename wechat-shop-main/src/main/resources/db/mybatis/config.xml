@@ -9,10 +9,9 @@
     <mappers>
         <mapper resource="db/mybatis/mapper/UserMapper.xml"/>
         <mapper resource="db/mybatis/mapper/GoodsMapper.xml"/>
-        <mapper resource="db/mybatis/mapper/OrderGoodsMapper.xml"/>
-        <mapper resource="db/mybatis/mapper/OrderMapper.xml"/>
         <mapper resource="db/mybatis/mapper/ShopMapper.xml"/>
         <mapper resource="db/mybatis/mapper/ShoppingCartMapper.xml"/>
         <mapper resource="db/mybatis/mapper/CustomShoppingCartMapper.xml"/>
+        <mapper resource="db/mybatis/mapper/GoodsStockMapper.xml"/>
     </mappers>
 </configuration>

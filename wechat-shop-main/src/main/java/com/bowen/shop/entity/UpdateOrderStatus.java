@@ -1,5 +1,7 @@
 package com.bowen.shop.entity;
 
+import com.bowen.shop.api.entity.DataStatus;
+
 public class UpdateOrderStatus extends UpdateOrderInfo {
     private DataStatus status;
 

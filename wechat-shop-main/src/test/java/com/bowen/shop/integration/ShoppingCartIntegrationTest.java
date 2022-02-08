@@ -1,7 +1,7 @@
 package com.bowen.shop.integration;
 
 import com.bowen.shop.WechatShopApplication;
-import com.bowen.shop.entity.GoodsIdAndNumber;
+import com.bowen.shop.api.entity.GoodsIdAndNumber;
 import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;

@@ -1,7 +1,7 @@
 package com.bowen.shop.integration;
 
 import com.bowen.shop.WechatShopApplication;
-import com.bowen.shop.entity.DataStatus;
+import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.fasterxml.jackson.core.type.TypeReference;

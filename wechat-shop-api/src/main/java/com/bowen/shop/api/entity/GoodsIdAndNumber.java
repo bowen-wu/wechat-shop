@@ -1,6 +1,8 @@
-package com.bowen.shop.entity;
+package com.bowen.shop.api.entity;
 
-public class GoodsIdAndNumber {
+import java.io.Serializable;
+
+public class GoodsIdAndNumber implements Serializable {
     private int number;
     private long id;
 

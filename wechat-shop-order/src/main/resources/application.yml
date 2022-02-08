@@ -7,6 +7,13 @@ embedded:
 spring:
   application:
     name: wechat-shop-order
+  datasource:
+    url: jdbc:mysql://${embedded.baseUrl.ip}:3306/order
+    username: root
+    password: my-secret-pw
+    driverClassName: com.mysql.cj.jdbc.Driver
+mybatis:
+  config-location: classpath:db/mybatis/config.xml
 
 shop:
   orderService:

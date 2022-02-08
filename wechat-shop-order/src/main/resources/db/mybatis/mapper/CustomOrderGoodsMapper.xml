@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bowen.shop.order.dao.CustomOrderGoodsMapper">
+    <insert id="batchInsert" parameterType="List">
+        INSERT INTO ORDER_GOODS
+        (GOODS_ID, NUMBER, ORDER_ID)
+        VALUES
+        <foreach collection="list" item="com.bowen.shop.api.generate.OrderGoods" separator=",">
+            (#{goodsId}, #{number}, #{orderId})
+        </foreach>
+    </insert>
+
+</mapper>
