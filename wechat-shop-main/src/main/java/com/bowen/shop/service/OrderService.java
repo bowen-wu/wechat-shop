@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +103,7 @@ public class OrderService {
         order.setAddress(userMapper.selectByPrimaryKey(userId).getAddress());
         order.setTotalPrice(goodsIdAndNumberList.stream()
                 .map(goodsIdAndNumber -> calculateItemTotalPrice(idToGoodsMap, goodsIdAndNumber))
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+                .reduce(0, Math::addExact));
         order.setUserId(userId);
         return orderRpcService.createOrder(goodsIdAndNumberList, order);
     }
@@ -115,7 +114,7 @@ public class OrderService {
         return goodsWithNumber;
     }
 
-    private BigDecimal calculateItemTotalPrice(Map<Long, Goods> idToGoodsMap, GoodsIdAndNumber goodsIdAndNumber) {
+    private long calculateItemTotalPrice(Map<Long, Goods> idToGoodsMap, GoodsIdAndNumber goodsIdAndNumber) {
         Goods goods = idToGoodsMap.get(goodsIdAndNumber.getId());
         if (goods == null) {
             throw HttpException.badRequest("goods id非法：" + goodsIdAndNumber.getId());
@@ -123,7 +122,7 @@ public class OrderService {
         if (goodsIdAndNumber.getNumber() <= 0) {
             throw HttpException.badRequest("数量非法：" + goodsIdAndNumber.getNumber());
         }
-        return goods.getPrice().multiply(new BigDecimal(goodsIdAndNumber.getNumber()));
+        return goods.getPrice() * goodsIdAndNumber.getNumber();
     }
 
 }

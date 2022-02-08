@@ -4,6 +4,7 @@ import com.bowen.shop.WechatShopApplication;
 import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.generate.Goods;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -22,7 +23,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
@@ -48,7 +48,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
         testGoods.setDescription("description");
         testGoods.setDetails("details");
         testGoods.setName("goods");
-        testGoods.setPrice(new BigDecimal(100));
+        testGoods.setPrice(100L);
         testGoods.setImageUrl("http://url");
         testGoods.setStatus(DataStatus.OK.getStatus());
     }
@@ -73,7 +73,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
             // 2. 更改商品
             testGoods.setStock(1);
             testGoods.setName("New name");
-            testGoods.setPrice(new BigDecimal(10));
+            testGoods.setPrice(10L);
             ClassicHttpRequest updateGoods = createRequestBuilder(Method.PATCH, "/api/v1/goods", testGoods);
             try (CloseableHttpResponse response = httpclient.execute(updateGoods)) {
                 assertEquals(HTTP_OK, response.getCode());
@@ -129,7 +129,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
             assertHttpException(httpclient, Method.POST, "/api/v1/goods", badRequestGoods, HTTP_BAD_REQUEST, "请检查参数！");
             badRequestGoods.setName("name");
             assertHttpException(httpclient, Method.POST, "/api/v1/goods", badRequestGoods, HTTP_BAD_REQUEST, "请检查参数！");
-            badRequestGoods.setPrice(new BigDecimal(100));
+            badRequestGoods.setPrice(100L);
             assertHttpException(httpclient, Method.POST, "/api/v1/goods", badRequestGoods, HTTP_BAD_REQUEST, "请检查参数！");
 
             testGoods.setShopId(10L);
