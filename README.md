@@ -89,8 +89,9 @@
 
 1. 在 IDEA 中运行测试时，需要启动本地的 MySQL 和 Redis
    ```
-   docker run --name wechat-shop-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -e MYSQL_shop -p 3307:3306 -d mysql:8 
-   docker run --name wechat-shop-reids -p 6380:6379 -d redis
+   docker run --name wechat-shop-mysql-4-test -p 3307:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -e MYSQL_DATABASE=shop -d mysql:8
+   docker exec -it <containerId> mysql -uroot -pmy-secret-pw -e 'create database if not exists `order`'
+   docker run --name wechat-shop-reids-4-test -p 6380:6379 -d redis
    ```
 2. 同一个 mysql docker 开两个数据库
    ```
@@ -101,4 +102,15 @@
    ```
    mvn exec:jave -pl my-module 
    ```
-
+4. 明明依赖了本地的包，却找不到 => 将字节码安装到本地仓库中 => 把对应的所有模块的 jar 包都安装到本地仓库中，方便其他模块调用
+   ```
+   mvn install -DskipTests
+   ```
+5. ` @Transactional `
+    1. 注解的方法必须是 ` public `
+    2. 只有通过别的 service 调用时才生效 => 使用 this 调用不可以
+6. [使用调试器的方式运行 test](https://maven.apache.org/surefire/maven-surefire-plugin/examples/debugging.html)
+   ```
+   mvn -Dmaven.surefire.debug test
+   ```
+   运行测试时会等待 5005 端口的调试器连接 => 新建 5005 端口的 remote debug => 运行的测试和 Maven 运行的环境完全一致

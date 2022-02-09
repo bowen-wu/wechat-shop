@@ -1,7 +1,6 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.api.entity.GoodsIdAndNumber;
-import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.Pages;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -193,12 +192,7 @@ public class ShoppingCartController {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             return Response.fail("请求参数错误！");
         }
-        try {
-            return Response.success(shoppingCartService.addGoodsListToShoppingCart(goodsIdAndNumberList, UserContext.getCurrentUser().getId()));
-        } catch (HttpException e) {
-            response.setStatus(e.getStatusCode());
-            return Response.fail(e.getMessage());
-        }
+        return Response.success(shoppingCartService.addGoodsListToShoppingCart(goodsIdAndNumberList, UserContext.getCurrentUser().getId()));
     }
 
     /**
@@ -258,11 +252,6 @@ public class ShoppingCartController {
     @DeleteMapping("/shoppingCart/{goodsId}")
     public Response<ShoppingCartData> deleteGoodsInShoppingCart(@PathVariable("goodsId") long goodsId,
                                                                 HttpServletResponse response) {
-        try {
-            return Response.success(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
-        } catch (HttpException e) {
-            response.setStatus(e.getStatusCode());
-            return Response.fail(e.getMessage());
-        }
+        return Response.success(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
     }
 }

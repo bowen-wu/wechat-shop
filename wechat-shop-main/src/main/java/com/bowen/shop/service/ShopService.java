@@ -4,6 +4,7 @@ import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.ResponseWithPages;
 import com.bowen.shop.generate.Shop;
+import com.bowen.shop.generate.ShopExample;
 import com.bowen.shop.generate.ShopMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.ibatis.session.RowBounds;
@@ -18,7 +19,7 @@ import java.util.List;
 @Service
 public class ShopService {
     private final ShopMapper shopMapper;
-    private static Logger logger = LoggerFactory.getLogger(ShopService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShopService.class);
 
     @Autowired
     @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
@@ -33,20 +34,20 @@ public class ShopService {
 
     private void checkShopIsNotFound(Shop shop) {
         if (shop == null || DataStatus.DELETED.getStatus().equals(shop.getStatus())) {
-            logger.warn("Not Found Shop");
+            LOGGER.warn("Not Found Shop");
             throw HttpException.notFound("店铺不存在！");
         }
     }
 
     private void checkShopIsForbidden(Shop shop, String errorMessage) {
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
-            logger.warn("Forbidden {}", shop.getId());
+            LOGGER.warn("Forbidden {}", shop.getId());
             throw HttpException.forbidden(errorMessage);
         }
     }
 
     public Shop deleteShop(Long shopId) {
-        logger.info("Delete shop, shopId is " + shopId.toString().replaceAll("[\r\n]", ""));
+        LOGGER.info("Delete shop, shopId is " + shopId.toString().replaceAll("[\r\n]", ""));
         Shop shop = shopMapper.selectByPrimaryKey(shopId);
         checkShopIsNotFound(shop);
         checkShopIsForbidden(shop, "不能删除非自己管理的店铺！");

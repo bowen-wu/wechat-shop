@@ -1,6 +1,6 @@
 embedded:
   baseUrl:
-    ip: 127.0.0.1
+    ip: 10.40.95.56
   zookeeper:
     port: 12345
   redis:

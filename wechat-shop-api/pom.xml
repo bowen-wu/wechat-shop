@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <artifactId>wechat-shop-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>wechat-shop-api</name>
     <description>Wechat shop api</description>
 
@@ -24,37 +24,4 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.mybatis.generator</groupId>
-                <artifactId>mybatis-generator-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <configuration>
-                    <url>jdbc:mysql://10.40.95.56:3306/order</url>
-                    <user>root</user>
-                    <password>my-secret-pw</password>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>test-database-setup</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>migrate</goal>
-                        </goals>
-                        <configuration>
-                            <url>jdbc:mysql://localhost:3307/order</url>
-                            <user>root</user>
-                            <password>my-secret-pw</password>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

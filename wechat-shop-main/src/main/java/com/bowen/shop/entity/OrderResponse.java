@@ -2,9 +2,11 @@ package com.bowen.shop.entity;
 
 import com.bowen.shop.api.generate.Order;
 import com.bowen.shop.generate.Shop;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
 public class OrderResponse extends Order {
     private Shop shop;
     private List<GoodsWithNumber> goodsList;

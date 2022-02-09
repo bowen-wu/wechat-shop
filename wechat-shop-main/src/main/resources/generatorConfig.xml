@@ -6,6 +6,7 @@
 <generatorConfiguration>
     <context id="wechatShop" targetRuntime="MyBatis3">
         <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
         <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"/>
         <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"

@@ -1,7 +1,6 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.api.entity.DataStatus;
-import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.Pages;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -147,13 +146,8 @@ public class ShopController {
      */
     @DeleteMapping("/shop/{shopId}")
     public Response<Shop> deleteShop(@PathVariable("shopId") Long shopId, HttpServletResponse response) {
-        try {
-            response.setStatus(HttpStatus.NO_CONTENT.value());
-            return Response.success(shopService.deleteShop(shopId));
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+        response.setStatus(HttpStatus.NO_CONTENT.value());
+        return Response.success(shopService.deleteShop(shopId));
     }
 
     /**
@@ -203,12 +197,7 @@ public class ShopController {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             return Response.fail("请检查参数！");
         }
-        try {
-            return Response.success(shopService.updateShop(shop));
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+        return Response.success(shopService.updateShop(shop));
     }
 
     /**
@@ -240,17 +229,11 @@ public class ShopController {
      * 获取指定id的店铺
      *
      * @param shopId   店铺id
-     * @param response response
      * @return 店铺
      */
     @GetMapping("/shop/{shopId}")
-    public Response<Shop> getShopById(@PathVariable("shopId") Long shopId, HttpServletResponse response) {
-        try {
-            return Response.success(shopService.getShopById(shopId));
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+    public Response<Shop> getShopById(@PathVariable("shopId") Long shopId) {
+        return Response.success(shopService.getShopById(shopId));
     }
 
     /**

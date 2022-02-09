@@ -17,7 +17,6 @@
     <properties>
         <java.version>1.8</java.version>
         <dubbo.version>3.0.5</dubbo.version>
-        <rpc.api.version>0.0.1-SNAPSHOT</rpc.api.version>
         <mybatis.version>2.2.0</mybatis.version>
         <mybatis.generator.version>1.4.0</mybatis.generator.version>
         <flyway.version>8.0.5</flyway.version>
@@ -40,17 +39,12 @@
 
     <modules>
         <module>wechat-shop-main</module>
-        <module>wechat-shop-api</module>
         <module>wechat-shop-order</module>
+        <module>wechat-shop-api</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.bowen.shop</groupId>
-                <artifactId>wechat-shop-api</artifactId>
-                <version>${rpc.api.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-spring-boot-starter</artifactId>

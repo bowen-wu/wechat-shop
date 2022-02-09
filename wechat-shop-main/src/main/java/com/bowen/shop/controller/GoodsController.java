@@ -1,6 +1,5 @@
 package com.bowen.shop.controller;
 
-import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.Pages;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.ResponseWithPages;
@@ -103,12 +102,7 @@ public class GoodsController {
         }
         clean(goods);
         response.setStatus(HttpStatus.CREATED.value());
-        try {
-            return Response.success(goodsService.createGoods(goods));
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+        return Response.success(goodsService.createGoods(goods));
     }
 
     /**
@@ -153,14 +147,9 @@ public class GoodsController {
      */
     @DeleteMapping("/goods/{goodsId}")
     public Response<Goods> deleteGoods(@PathVariable("goodsId") long goodsId, HttpServletResponse response) {
-        try {
-            response.setStatus(HttpStatus.NO_CONTENT.value());
-            Goods goods = goodsService.deleteGoods(goodsId);
-            return Response.success(goods);
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+        response.setStatus(HttpStatus.NO_CONTENT.value());
+        Goods goods = goodsService.deleteGoods(goodsId);
+        return Response.success(goods);
     }
 
     /**
@@ -217,14 +206,9 @@ public class GoodsController {
      */
     @PatchMapping("/goods")
     public Response<Goods> updateGoods(@RequestBody Goods goods, HttpServletResponse response) {
-        try {
-            response.setStatus(HttpStatus.OK.value());
-            Goods updatedGoods = goodsService.updateGoods(goods);
-            return Response.success(updatedGoods);
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+        response.setStatus(HttpStatus.OK.value());
+        Goods updatedGoods = goodsService.updateGoods(goods);
+        return Response.success(updatedGoods);
     }
 
     /**
@@ -269,14 +253,9 @@ public class GoodsController {
      */
     @GetMapping("/goods/{goodsId}")
     public Response<Goods> getGoodsByGoodsId(@PathVariable("goodsId") long goodsId, HttpServletResponse response) {
-        try {
-            response.setStatus(HttpStatus.OK.value());
-            Goods updatedGoods = goodsService.getGoodsById(goodsId);
-            return Response.success(updatedGoods);
-        } catch (HttpException exception) {
-            response.setStatus(exception.getStatusCode());
-            return Response.fail(exception.getMessage());
-        }
+        response.setStatus(HttpStatus.OK.value());
+        Goods updatedGoods = goodsService.getGoodsById(goodsId);
+        return Response.success(updatedGoods);
     }
 
     /**

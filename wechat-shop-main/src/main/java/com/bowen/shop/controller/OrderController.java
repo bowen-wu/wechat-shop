@@ -1,7 +1,6 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.api.entity.GoodsIdAndNumber;
-import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.OrderResponse;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.entity.UpdateOrderInfo;
@@ -108,17 +107,13 @@ public class OrderController {
      * 下订单
      *
      * @param goodsIdAndNumberList 商品列表
-     * @param response             response
+     * @return 订单信息
      */
     @PostMapping("/order")
-    public Response<OrderResponse> placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList, HttpServletResponse response) {
-        try {
-            OrderResponse orderResponse = orderService.placeOrder(goodsIdAndNumberList, UserContext.getCurrentUser().getId());
-            return Response.success(orderResponse);
-        } catch (HttpException e) {
-            response.setStatus(e.getStatusCode());
-            return Response.fail(e.getMessage());
-        }
+    public Response<OrderResponse> placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList) {
+        orderService.deductStock(goodsIdAndNumberList);
+        OrderResponse orderResponse = orderService.placeOrder(goodsIdAndNumberList, UserContext.getCurrentUser().getId());
+        return Response.success(orderResponse);
     }
 
     /**
@@ -175,11 +170,10 @@ public class OrderController {
     /**
      * 删除订单
      *
-     * @param orderId  订单ID
-     * @param response response
+     * @param orderId 订单ID
      */
     @DeleteMapping("/order/{orderId}")
-    public void deleteOrderById(@PathVariable("orderId") long orderId, HttpServletResponse response) {
+    public void deleteOrderById(@PathVariable("orderId") long orderId) {
     }
 
     /**

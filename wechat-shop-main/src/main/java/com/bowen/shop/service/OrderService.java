@@ -12,13 +12,13 @@ import com.bowen.shop.generate.GoodsExample;
 import com.bowen.shop.generate.GoodsMapper;
 import com.bowen.shop.generate.ShopMapper;
 import com.bowen.shop.generate.UserMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,42 +32,36 @@ public class OrderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
     @DubboReference(version = "${shop.orderService.version}", url = "${shop.orderService.url}")
     private OrderRpcService orderRpcService;
+
     private final GoodsMapper goodsMapper;
     private final ShopMapper shopMapper;
     private final UserMapper userMapper;
     private final GoodsStockMapper goodsStockMapper;
-    private final SqlSessionFactory sqlSessionFactory;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public OrderService(GoodsMapper goodsMapper,
                         ShopMapper shopMapper,
                         UserMapper userMapper,
-                        GoodsStockMapper goodsStockMapper,
-                        SqlSessionFactory sqlSessionFactory) {
+                        GoodsStockMapper goodsStockMapper) {
         this.goodsMapper = goodsMapper;
         this.shopMapper = shopMapper;
         this.userMapper = userMapper;
         this.goodsStockMapper = goodsStockMapper;
-        this.sqlSessionFactory = sqlSessionFactory;
     }
 
     /**
      * 扣减库存
      *
      * @param goodsIdAndNumberList 商品ID和数量列表
-     * @return 若扣减成功返回 true，否则返回 false
      */
-    private boolean deductStock(List<GoodsIdAndNumber> goodsIdAndNumberList) {
-        try (SqlSession sqlSession = sqlSessionFactory.openSession(false)) {
-            for (GoodsIdAndNumber goodsIdAndNumber : goodsIdAndNumberList) {
-                if (goodsStockMapper.deductStock(goodsIdAndNumber) <= 0) {
-                    LOGGER.error("扣减库存失败，商品ID：" + goodsIdAndNumber.getId() + "，数量：" + goodsIdAndNumber.getNumber());
-                    sqlSession.rollback();
-                    return false;
-                }
+    @Transactional
+    public void deductStock(List<GoodsIdAndNumber> goodsIdAndNumberList) {
+        for (GoodsIdAndNumber goodsIdAndNumber : goodsIdAndNumberList) {
+            if (goodsStockMapper.deductStock(goodsIdAndNumber) <= 0) {
+                LOGGER.error("扣减库存失败，商品ID：" + goodsIdAndNumber.getId() + "，数量：" + goodsIdAndNumber.getNumber());
+                throw HttpException.gone("扣减库存失败！");
             }
-            sqlSession.commit();
-            return true;
         }
     }
 
@@ -79,10 +73,6 @@ public class OrderService {
     }
 
     public OrderResponse placeOrder(List<GoodsIdAndNumber> goodsIdAndNumberList, long userId) {
-        if (!deductStock(goodsIdAndNumberList)) {
-            throw HttpException.gone("扣减库存失败!");
-        }
-
         Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(goodsIdAndNumberList.stream().distinct().map(GoodsIdAndNumber::getId).collect(toList()));
         Order order = createOrderViaRpc(goodsIdAndNumberList, userId, idToGoodsMap);
         return generateOrderResponse(goodsIdAndNumberList, idToGoodsMap, order);
@@ -103,7 +93,7 @@ public class OrderService {
         order.setAddress(userMapper.selectByPrimaryKey(userId).getAddress());
         order.setTotalPrice(goodsIdAndNumberList.stream()
                 .map(goodsIdAndNumber -> calculateItemTotalPrice(idToGoodsMap, goodsIdAndNumber))
-                .reduce(0, Math::addExact));
+                .reduce(0L, Math::addExact));
         order.setUserId(userId);
         return orderRpcService.createOrder(goodsIdAndNumberList, order);
     }

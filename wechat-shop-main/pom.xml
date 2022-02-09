@@ -88,6 +88,7 @@
         <dependency>
             <groupId>com.bowen.shop</groupId>
             <artifactId>wechat-shop-api</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -297,6 +298,22 @@
                                 <argument>rm</argument>
                                 <argument>-f</argument>
                                 <argument>shop-mysql-for-test</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>teardown-test-redis</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>rm</argument>
+                                <argument>-f</argument>
+                                <argument>shop-redis-for-test</argument>
                             </arguments>
                         </configuration>
                     </execution>
