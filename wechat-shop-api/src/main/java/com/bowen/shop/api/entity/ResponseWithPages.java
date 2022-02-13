@@ -1,6 +1,8 @@
-package com.bowen.shop.entity;
+package com.bowen.shop.api.entity;
 
-public class ResponseWithPages<T> extends Pages {
+import java.io.Serializable;
+
+public class ResponseWithPages<T> extends Pages implements Serializable {
     private int totalPage;
     private T data;
 

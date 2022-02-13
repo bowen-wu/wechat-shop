@@ -1,9 +1,9 @@
 package com.bowen.shop.controller;
 
 import com.bowen.shop.api.entity.DataStatus;
-import com.bowen.shop.entity.Pages;
+import com.bowen.shop.api.entity.Pages;
 import com.bowen.shop.entity.Response;
-import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.api.entity.ResponseWithPages;
 import com.bowen.shop.generate.Shop;
 import com.bowen.shop.service.ShopService;
 import com.bowen.shop.service.UserContext;

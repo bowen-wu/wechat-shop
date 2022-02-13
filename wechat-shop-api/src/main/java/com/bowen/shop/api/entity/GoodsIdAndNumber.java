@@ -6,6 +6,10 @@ public class GoodsIdAndNumber implements Serializable {
     private int number;
     private long id;
 
+    public static GoodsIdAndNumber of(int number, long id) {
+        return new GoodsIdAndNumber(number, id);
+    }
+
     public GoodsIdAndNumber(int number, long id) {
         this.number = number;
         this.id = id;

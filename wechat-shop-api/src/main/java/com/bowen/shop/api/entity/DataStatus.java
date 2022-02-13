@@ -19,4 +19,12 @@ public enum DataStatus {
     public String getStatus() {
         return status;
     }
+
+    public static DataStatus fromStatus(String name) {
+        try {
+            return DataStatus.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 }

@@ -1,6 +1,6 @@
 package com.bowen.shop.service;
 
-import com.bowen.shop.entity.HttpException;
+import com.bowen.shop.api.entity.HttpException;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.http.HttpStatus;
 

@@ -1,12 +1,17 @@
 package com.bowen.shop.controller;
 
+import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.api.entity.GoodsIdAndNumber;
+import com.bowen.shop.api.entity.HttpException;
+import com.bowen.shop.api.entity.Pages;
+import com.bowen.shop.api.entity.ResponseWithPages;
+import com.bowen.shop.api.generate.Order;
 import com.bowen.shop.entity.OrderResponse;
 import com.bowen.shop.entity.Response;
-import com.bowen.shop.entity.UpdateOrderInfo;
 import com.bowen.shop.service.OrderService;
 import com.bowen.shop.service.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -173,7 +178,8 @@ public class OrderController {
      * @param orderId 订单ID
      */
     @DeleteMapping("/order/{orderId}")
-    public void deleteOrderById(@PathVariable("orderId") long orderId) {
+    public Response<OrderResponse> deleteOrderById(@PathVariable("orderId") long orderId) {
+        return Response.success(orderService.deleteOrder(orderId, UserContext.getCurrentUser().getId()));
     }
 
     /**
@@ -243,7 +249,16 @@ public class OrderController {
      * @param response  response
      */
     @PatchMapping("/order")
-    public void updateOrderInfo(@RequestBody UpdateOrderInfo orderInfo, HttpServletResponse response) {
+    public Response<OrderResponse> updateOrderInfo(@RequestBody Order order, HttpServletResponse response) {
+        if (order.getId() == null) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            return Response.fail("非法 orderId" + order.getId());
+        }
+        if (order.getExpressCompany() != null && order.getExpressId() != null) {
+            return Response.success(orderService.updateExpressInformation(order, UserContext.getCurrentUser().getId()));
+        } else {
+            return Response.success(orderService.updateOrderStatus(order, UserContext.getCurrentUser().getId()));
+        }
     }
 
     /**
@@ -253,6 +268,7 @@ public class OrderController {
      *
      * @apiParam {Number} pageNum 页数，从1开始
      * @apiParam {Number} pageSize 每页显示数量
+     * @apiParam {String=pending/paid/delivered/received} [status] 订单状态: PENDING 等付款 PAID 已付款 DELIVERED 物流中 RECEIVED 已收货
      *
      * @apiSuccess {Number} pageNum 页数，从1开始
      * @apiSuccess {Number} pageSize 每页显示数量
@@ -313,12 +329,18 @@ public class OrderController {
      *
      * @param pageNum  当前页码
      * @param pageSize 一页展示多少条数据
-     * @param response response
+     * @param status   订单状态
+     * @return response
      */
     @GetMapping("/order")
-    public void getOrderListByUserId(@RequestParam("pageNum") int pageNum,
-                                     @RequestParam("pageSize") Integer pageSize,
-                                     HttpServletResponse response) {
+    public ResponseWithPages<List<OrderResponse>> getOrderListByUserId(@RequestParam("pageNum") int pageNum,
+                                                                       @RequestParam("pageSize") Integer pageSize,
+                                                                       @RequestParam(value = "status", required = false) String status) {
+        if (status != null && DataStatus.fromStatus(status) == null) {
+            throw HttpException.badRequest("非法 status：" + status);
+        }
+        int isolatePageSize = pageSize == null ? Pages.DEFAULT_PAGE_SIZE : pageSize;
+        return orderService.getOrderListWithPageByUserId(pageNum, isolatePageSize, DataStatus.fromStatus(status), UserContext.getCurrentUser().getId());
     }
 
 }

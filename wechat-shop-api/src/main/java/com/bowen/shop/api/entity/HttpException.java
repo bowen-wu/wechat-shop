@@ -1,4 +1,4 @@
-package com.bowen.shop.entity;
+package com.bowen.shop.api.entity;
 
 import org.springframework.http.HttpStatus;
 

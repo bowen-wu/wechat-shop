@@ -4,7 +4,7 @@ import com.bowen.shop.dao.CustomShoppingCartMapper;
 import com.bowen.shop.api.entity.GoodsIdAndNumber;
 import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.entity.GoodsWithNumber;
-import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.api.entity.ResponseWithPages;
 import com.bowen.shop.entity.ShoppingCartData;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.generate.GoodsMapper;

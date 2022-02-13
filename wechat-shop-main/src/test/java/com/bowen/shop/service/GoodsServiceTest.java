@@ -1,8 +1,8 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.api.entity.DataStatus;
-import com.bowen.shop.entity.HttpException;
-import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.api.entity.HttpException;
+import com.bowen.shop.api.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.generate.GoodsMapper;
 import com.bowen.shop.generate.Shop;

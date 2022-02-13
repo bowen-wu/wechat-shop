@@ -1,7 +1,7 @@
 package com.bowen.shop.service;
 
 import com.bowen.shop.api.entity.DataStatus;
-import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.api.entity.ResponseWithPages;
 import com.bowen.shop.generate.Shop;
 import com.bowen.shop.generate.ShopMapper;
 import com.bowen.shop.generate.User;

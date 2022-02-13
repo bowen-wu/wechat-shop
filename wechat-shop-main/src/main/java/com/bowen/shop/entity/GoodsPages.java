@@ -1,5 +1,7 @@
 package com.bowen.shop.entity;
 
+import com.bowen.shop.api.entity.Pages;
+
 public class GoodsPages extends Pages {
     private Long shopId;
 

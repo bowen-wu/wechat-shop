@@ -3,7 +3,7 @@ package com.bowen.shop.integration;
 import com.bowen.shop.WechatShopApplication;
 import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.entity.Response;
-import com.bowen.shop.entity.ResponseWithPages;
+import com.bowen.shop.api.entity.ResponseWithPages;
 import com.bowen.shop.generate.Goods;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;

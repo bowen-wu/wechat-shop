@@ -1,15 +1,19 @@
 package com.bowen.shop.service;
 
+import com.bowen.shop.api.entity.DataStatus;
 import com.bowen.shop.api.entity.GoodsIdAndNumber;
+import com.bowen.shop.api.entity.HttpException;
+import com.bowen.shop.api.entity.ResponseWithPages;
+import com.bowen.shop.api.entity.RpcOrder;
 import com.bowen.shop.api.generate.Order;
 import com.bowen.shop.api.rpc.OrderRpcService;
 import com.bowen.shop.dao.GoodsStockMapper;
 import com.bowen.shop.entity.GoodsWithNumber;
-import com.bowen.shop.entity.HttpException;
 import com.bowen.shop.entity.OrderResponse;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.generate.GoodsExample;
 import com.bowen.shop.generate.GoodsMapper;
+import com.bowen.shop.generate.Shop;
 import com.bowen.shop.generate.ShopMapper;
 import com.bowen.shop.generate.UserMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,6 +95,7 @@ public class OrderService {
 
     private Order createOrderViaRpc(List<GoodsIdAndNumber> goodsIdAndNumberList, long userId, Map<Long, Goods> idToGoodsMap) {
         Order order = new Order();
+        // TODO: order setShopId
         order.setAddress(userMapper.selectByPrimaryKey(userId).getAddress());
         order.setTotalPrice(goodsIdAndNumberList.stream()
                 .map(goodsIdAndNumber -> calculateItemTotalPrice(idToGoodsMap, goodsIdAndNumber))
@@ -115,4 +121,64 @@ public class OrderService {
         return goods.getPrice() * goodsIdAndNumber.getNumber();
     }
 
+    public OrderResponse deleteOrder(long orderId, long userId) {
+        RpcOrder rpcOrder = orderRpcService.deleteOrder(orderId, userId);
+        return convertRpcOrderToOrderResponse(rpcOrder);
+    }
+
+    private OrderResponse convertRpcOrderToOrderResponse(RpcOrder rpcOrder) {
+        Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(rpcOrder.getGoodsIdAndNumberList().stream().map(GoodsIdAndNumber::getId).collect(toList()));
+        return generateOrderResponse(rpcOrder.getGoodsIdAndNumberList(), idToGoodsMap, rpcOrder);
+    }
+
+    public ResponseWithPages<List<OrderResponse>> getOrderListWithPageByUserId(int pageNum, int pageSize, DataStatus status, Long userId) {
+        ResponseWithPages<List<RpcOrder>> orderListResponseWithPages = orderRpcService.getOrderListWithPageByUserId(pageNum, pageSize, status, userId);
+
+        List<Long> goodsIdList = orderListResponseWithPages
+                .getData()
+                .stream()
+                .map(RpcOrder::getGoodsIdAndNumberList)
+                .flatMap(Collection::stream)
+                .map(GoodsIdAndNumber::getId)
+                .collect(toList());
+
+        Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(goodsIdList);
+
+        List<OrderResponse> orderResponseList = orderListResponseWithPages
+                .getData()
+                .stream()
+                .map(rpcOrder -> generateOrderResponse(rpcOrder.getGoodsIdAndNumberList(), idToGoodsMap, rpcOrder))
+                .collect(toList());
+
+        return ResponseWithPages.response(pageNum, pageSize, orderListResponseWithPages.getTotalPage(), orderResponseList);
+    }
+
+    public OrderResponse updateExpressInformation(Order order, long userId) {
+        checkOrderIsValid(order, userId);
+
+        Order pendingUpdateOrder = new Order();
+        pendingUpdateOrder.setId(order.getId());
+        pendingUpdateOrder.setExpressId(order.getExpressId());
+        pendingUpdateOrder.setExpressCompany(order.getExpressCompany());
+        return convertRpcOrderToOrderResponse(orderRpcService.updateOrder(pendingUpdateOrder));
+    }
+
+    private void checkOrderIsValid(Order order, long userId) {
+        Order orderById = orderRpcService.getOrderById(order.getId());
+        if (orderById == null || DataStatus.DELETED.getStatus().equals(orderById.getStatus())) {
+            throw HttpException.notFound("订单未找到，orderId" + order.getId());
+        }
+        Shop shop = shopMapper.selectByPrimaryKey(orderById.getShopId());
+        if (shop.getOwnerUserId() != userId) {
+            throw HttpException.forbidden("无权访问！");
+        }
+    }
+
+    public OrderResponse updateOrderStatus(Order order, long userId) {
+        checkOrderIsValid(order, userId);
+
+        Order pendingUpdateOrder = new Order();
+        pendingUpdateOrder.setStatus(order.getStatus());
+        return convertRpcOrderToOrderResponse(orderRpcService.updateOrder(pendingUpdateOrder));
+    }
 }

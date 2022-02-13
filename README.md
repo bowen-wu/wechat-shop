@@ -114,3 +114,5 @@
    mvn -Dmaven.surefire.debug test
    ```
    运行测试时会等待 5005 端口的调试器连接 => 新建 5005 端口的 remote debug => 运行的测试和 Maven 运行的环境完全一致
+7. **不要在循环中进行SQL查询**
+8. **不要在 ` stream ` 中使用 ` stream `**

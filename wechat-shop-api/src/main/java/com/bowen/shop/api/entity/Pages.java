@@ -1,6 +1,8 @@
-package com.bowen.shop.entity;
+package com.bowen.shop.api.entity;
 
-public class Pages {
+import java.io.Serializable;
+
+public class Pages implements Serializable {
     private int pageNum;
     private int pageSize;
     public static final int DEFAULT_PAGE_SIZE = 10;
