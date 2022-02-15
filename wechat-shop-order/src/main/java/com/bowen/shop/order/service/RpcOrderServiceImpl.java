@@ -103,8 +103,8 @@ public class RpcOrderServiceImpl implements OrderRpcService {
     @Override
     public RpcOrder updateOrder(Order order) {
         Order orderInDB = orderMapper.selectByPrimaryKey(order.getId());
-        // TODO: update 非空的字段更新
-        orderMapper.updateByPrimaryKey(order);
+        order.setUpdatedAt(new Date());
+        customOrderGoodsMapper.updateOrder(order);
         return convertOrderToRpcOrder(orderInDB);
     }
 
