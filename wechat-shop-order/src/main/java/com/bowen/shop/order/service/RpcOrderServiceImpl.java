@@ -13,6 +13,7 @@ import com.bowen.shop.api.generate.OrderGoodsMapper;
 import com.bowen.shop.api.generate.OrderMapper;
 import com.bowen.shop.api.rpc.OrderRpcService;
 import com.bowen.shop.order.dao.CustomOrderGoodsMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.ibatis.session.RowBounds;
@@ -35,6 +36,7 @@ public class RpcOrderServiceImpl implements OrderRpcService {
     private final CustomOrderGoodsMapper customOrderGoodsMapper;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public RpcOrderServiceImpl(OrderMapper orderMapper,
                                OrderGoodsMapper orderGoodsMapper,
                                CustomOrderGoodsMapper customOrderGoodsMapper) {
