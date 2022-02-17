@@ -10,6 +10,7 @@ import com.bowen.shop.entity.OrderResponse;
 import com.bowen.shop.entity.Response;
 import com.bowen.shop.service.OrderService;
 import com.bowen.shop.service.UserContext;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +32,7 @@ public class OrderController {
     private OrderService orderService;
 
     @Autowired
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
@@ -112,12 +114,14 @@ public class OrderController {
      * 下订单
      *
      * @param goodsIdAndNumberList 商品列表
+     * @param response             response
      * @return 订单信息
      */
     @PostMapping("/order")
-    public Response<OrderResponse> placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList) {
+    public Response<OrderResponse> placeOrder(@RequestBody List<GoodsIdAndNumber> goodsIdAndNumberList, HttpServletResponse response) {
         orderService.deductStock(goodsIdAndNumberList);
         OrderResponse orderResponse = orderService.placeOrder(goodsIdAndNumberList, UserContext.getCurrentUser().getId());
+        response.setStatus(HttpStatus.CREATED.value());
         return Response.success(orderResponse);
     }
 
@@ -175,10 +179,13 @@ public class OrderController {
     /**
      * 删除订单
      *
-     * @param orderId 订单ID
+     * @param orderId  订单ID
+     * @param response response
+     * @return OrderResponse
      */
     @DeleteMapping("/order/{orderId}")
-    public Response<OrderResponse> deleteOrderById(@PathVariable("orderId") long orderId) {
+    public Response<OrderResponse> deleteOrderById(@PathVariable("orderId") long orderId, HttpServletResponse response) {
+        response.setStatus(HttpStatus.NO_CONTENT.value());
         return Response.success(orderService.deleteOrder(orderId, UserContext.getCurrentUser().getId()));
     }
 
@@ -245,14 +252,15 @@ public class OrderController {
     /**
      * 更新订单
      *
-     * @param orderInfo 订单更新的信息
-     * @param response  response
+     * @param order    订单更新的信息
+     * @param response response
+     * @return OrderResponse
      */
     @PatchMapping("/order")
     public Response<OrderResponse> updateOrderInfo(@RequestBody Order order, HttpServletResponse response) {
         if (order.getId() == null) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
-            return Response.fail("非法 orderId" + order.getId());
+            return Response.fail("非法 orderId");
         }
         if (order.getExpressCompany() != null && order.getExpressId() != null) {
             return Response.success(orderService.updateExpressInformation(order, UserContext.getCurrentUser().getId()));
@@ -342,5 +350,4 @@ public class OrderController {
         int isolatePageSize = pageSize == null ? Pages.DEFAULT_PAGE_SIZE : pageSize;
         return orderService.getOrderListWithPageByUserId(pageNum, isolatePageSize, DataStatus.fromStatus(status), UserContext.getCurrentUser().getId());
     }
-
 }

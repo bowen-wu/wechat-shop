@@ -15,7 +15,7 @@ public interface OrderRpcService {
 
     ResponseWithPages<List<RpcOrder>> getOrderListWithPageByUserId(int pageNum, int pageSize, DataStatus status, Long userId);
 
-    Order getOrderById(long id);
+    Order getOrderById(long orderId);
 
     RpcOrder updateOrder(Order order);
 }

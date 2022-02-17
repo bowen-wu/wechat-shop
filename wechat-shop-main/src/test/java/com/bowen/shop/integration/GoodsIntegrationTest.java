@@ -105,7 +105,7 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
-    public void matchAllAttribute(Response<Goods> res) {
+    private void matchAllAttribute(Response<Goods> res) {
         assertEquals(testGoods.getShopId(), res.getData().getShopId());
         assertEquals(testGoods.getDescription(), res.getData().getDescription());
         assertEquals(testGoods.getDetails(), res.getData().getDetails());
@@ -139,7 +139,6 @@ class GoodsIntegrationTest extends AbstractIntegrationTest {
             assertHttpException(httpclient, Method.POST, "/api/v1/goods", testGoods, HTTP_FORBIDDEN, "不能创建非自己店铺的商品！");
         }
     }
-
 
     @Test
     public void returnExceptionWhenDeleteGoods() throws Exception {

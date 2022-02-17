@@ -164,6 +164,4 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
             }
         }
     }
-
-
 }

@@ -1,6 +1,7 @@
 package com.bowen.shop.api.entity;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class ResponseWithPages<T> extends Pages implements Serializable {
     private int totalPage;

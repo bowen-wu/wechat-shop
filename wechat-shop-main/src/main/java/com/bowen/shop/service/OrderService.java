@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -95,7 +96,8 @@ public class OrderService {
 
     private Order createOrderViaRpc(List<GoodsIdAndNumber> goodsIdAndNumberList, long userId, Map<Long, Goods> idToGoodsMap) {
         Order order = new Order();
-        // TODO: order setShopId
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsIdAndNumberList.get(0).getId());
+        order.setShopId(goods.getShopId());
         order.setAddress(userMapper.selectByPrimaryKey(userId).getAddress());
         order.setTotalPrice(goodsIdAndNumberList.stream()
                 .map(goodsIdAndNumber -> calculateItemTotalPrice(idToGoodsMap, goodsIdAndNumber))
@@ -106,7 +108,7 @@ public class OrderService {
 
     private GoodsWithNumber getGoodsWithNumber(Map<Long, Goods> idToGoodsMap, GoodsIdAndNumber goodsIdAndNumber) {
         GoodsWithNumber goodsWithNumber = new GoodsWithNumber(idToGoodsMap.get(goodsIdAndNumber.getId()));
-        goodsWithNumber.setNumber(goodsWithNumber.getNumber());
+        goodsWithNumber.setNumber(goodsIdAndNumber.getNumber());
         return goodsWithNumber;
     }
 
@@ -133,6 +135,9 @@ public class OrderService {
 
     public ResponseWithPages<List<OrderResponse>> getOrderListWithPageByUserId(int pageNum, int pageSize, DataStatus status, Long userId) {
         ResponseWithPages<List<RpcOrder>> orderListResponseWithPages = orderRpcService.getOrderListWithPageByUserId(pageNum, pageSize, status, userId);
+        if (orderListResponseWithPages.getData().isEmpty()) {
+            return ResponseWithPages.response(pageNum, pageSize, orderListResponseWithPages.getTotalPage(), Collections.emptyList());
+        }
 
         List<Long> goodsIdList = orderListResponseWithPages
                 .getData()
@@ -166,7 +171,7 @@ public class OrderService {
     private void checkOrderIsValid(Order order, long userId) {
         Order orderById = orderRpcService.getOrderById(order.getId());
         if (orderById == null || DataStatus.DELETED.getStatus().equals(orderById.getStatus())) {
-            throw HttpException.notFound("订单未找到，orderId" + order.getId());
+            throw HttpException.notFound("订单未找到，orderId：" + order.getId());
         }
         Shop shop = shopMapper.selectByPrimaryKey(orderById.getShopId());
         if (shop.getOwnerUserId() != userId) {

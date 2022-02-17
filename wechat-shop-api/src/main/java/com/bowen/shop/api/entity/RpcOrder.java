@@ -22,16 +22,15 @@ public class RpcOrder extends Order implements Serializable {
     }
 
     public RpcOrder(Order order) {
-        RpcOrder result = new RpcOrder();
-        result.setId(order.getId());
-        result.setUpdatedAt(order.getUpdatedAt());
-        result.setStatus(order.getStatus());
-        result.setAddress(order.getAddress());
-        result.setUserId(order.getUserId());
-        result.setExpressId(order.getExpressId());
-        result.setExpressCompany(order.getExpressCompany());
-        result.setCreatedAt(order.getCreatedAt());
-        result.setTotalPrice(order.getTotalPrice());
+        this.setId(order.getId());
+        this.setUpdatedAt(order.getUpdatedAt());
+        this.setStatus(order.getStatus());
+        this.setAddress(order.getAddress());
+        this.setUserId(order.getUserId());
+        this.setExpressId(order.getExpressId());
+        this.setExpressCompany(order.getExpressCompany());
+        this.setCreatedAt(order.getCreatedAt());
+        this.setTotalPrice(order.getTotalPrice());
     }
 
     public List<GoodsIdAndNumber> getGoodsIdAndNumberList() {

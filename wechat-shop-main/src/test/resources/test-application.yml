@@ -20,7 +20,8 @@ mybatis:
 shop:
   orderService:
     version: 1.0.0
-    url: dubbo://${embedded.baseUrl.ip}:${embedded.zookeeper.port}
+    # 此处必须使用 127.0.0.1 表示是 mock 的服务
+    url: dubbo://127.0.0.1:${embedded.zookeeper.port}
   redis:
     host: ${embedded.baseUrl.ip}
     port: ${embedded.redis.port}
@@ -33,3 +34,5 @@ dubbo:
   protocol:
     name: dubbo
     port: ${embedded.zookeeper.port}
+  registry:
+    address: N/A
