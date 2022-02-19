@@ -4,6 +4,9 @@ embedded:
   zookeeper:
     port: 2181
 
+server:
+  port: 8082
+
 spring:
   application:
     name: wechat-shop-order

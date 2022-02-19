@@ -6,6 +6,9 @@ embedded:
   redis:
     port: 6379
 
+server:
+  port: 8081
+
 spring:
   application:
     name: wechat-shop-main
