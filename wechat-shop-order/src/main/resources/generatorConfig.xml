@@ -28,8 +28,8 @@
             <property name="enableSubPackages" value="true"/>
         </sqlMapGenerator>
 
-        <javaClientGenerator type="XMLMAPPER" targetPackage="com.bowen.shop.api.generate"
-                             targetProject="wechat-shop-api/src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.bowen.shop.order.generate"
+                             targetProject="wechat-shop-order/src/main/java">
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
