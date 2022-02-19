@@ -5,13 +5,13 @@
         INSERT INTO ORDER_GOODS
         (GOODS_ID, NUMBER, ORDER_ID)
         VALUES
-        <foreach collection="list" item="com.bowen.shop.api.generate.OrderGoods" separator=",">
-            (#{goodsId}, #{number}, #{orderId})
+        <foreach collection="list" item="OrderGoods" separator=",">
+            (#{OrderGoods.goodsId}, #{OrderGoods.number}, #{OrderGoods.orderId})
         </foreach>
     </insert>
 
     <update id="updateOrder" parameterType="com.bowen.shop.api.generate.Order">
-        UPDATE ORDER SET
+        UPDATE `ORDER_TABLE` SET
         UPDATED_AT = now()
         <if test="expressCompany != null">
             ,
@@ -27,5 +27,12 @@
         </if>
         where ID = #{id}
     </update>
+
+    <select id="selectByPrimaryKey" parameterType="long" resultType="com.bowen.shop.api.generate.Order">
+        SELECT *
+        FROM `ORDER_TABLE`
+        WHERE ID = #{id}
+          AND STATUS != 'deleted';
+    </select>
 
 </mapper>

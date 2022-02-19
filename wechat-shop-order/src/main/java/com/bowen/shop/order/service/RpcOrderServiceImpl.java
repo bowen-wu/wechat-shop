@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -47,12 +48,34 @@ public class RpcOrderServiceImpl implements OrderRpcService {
 
     @Override
     public Order createOrder(List<GoodsIdAndNumber> goodsIdAndNumberList, Order order) {
-        insertOrder(order);
+        try {
+            insertOrder(order);
+        } catch (IllegalArgumentException e) {
+            throw HttpException.badRequest(e.getMessage());
+        }
         List<OrderGoods> orderGoodsList = goodsIdAndNumberList.stream()
                 .map(goodsIdAndNumber -> convertToOrderGoods(goodsIdAndNumber.getId(), goodsIdAndNumber.getNumber(), order.getId()))
                 .collect(toList());
         customOrderGoodsMapper.batchInsert(orderGoodsList);
         return order;
+    }
+
+    @Override
+    public RpcOrder updateOrder(Order order) {
+        Order orderInDB = orderMapper.selectByPrimaryKey(order.getId());
+        order.setUpdatedAt(new Date());
+        customOrderGoodsMapper.updateOrder(order);
+        if (!Objects.equals(order.getStatus(), orderInDB.getStatus())) {
+            orderInDB.setStatus(order.getStatus());
+        }
+
+        if (!Objects.equals(order.getExpressCompany(), orderInDB.getExpressCompany())) {
+            orderInDB.setExpressCompany(order.getExpressCompany());
+        }
+        if (!Objects.equals(order.getExpressId(), orderInDB.getExpressId())) {
+            orderInDB.setExpressId(order.getExpressId());
+        }
+        return convertOrderToRpcOrder(orderInDB);
     }
 
     @Override
@@ -72,6 +95,11 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         orderMapper.updateByPrimaryKey(order);
         orderGoodsMapper.deleteByExample(orderGoodsExample);
         return convertOrderToRpcOrder(order);
+    }
+
+    @Override
+    public Order getOrderById(long orderId) {
+        return customOrderGoodsMapper.selectByPrimaryKey(orderId);
     }
 
     @Override
@@ -102,19 +130,6 @@ public class RpcOrderServiceImpl implements OrderRpcService {
         return ResponseWithPages.response(pageNum, pageSize, totalPage, rpcOrderList);
     }
 
-    @Override
-    public RpcOrder updateOrder(Order order) {
-        Order orderInDB = orderMapper.selectByPrimaryKey(order.getId());
-        order.setUpdatedAt(new Date());
-        customOrderGoodsMapper.updateOrder(order);
-        return convertOrderToRpcOrder(orderInDB);
-    }
-
-    @Override
-    public Order getOrderById(long orderId) {
-        return orderMapper.selectByPrimaryKey(orderId);
-    }
-
     private RpcOrder convertOrderToRpcOrder(Order order) {
         OrderGoodsExample orderGoodsExample = new OrderGoodsExample();
         orderGoodsExample.createCriteria().andOrderIdEqualTo(order.getId());
@@ -138,9 +153,9 @@ public class RpcOrderServiceImpl implements OrderRpcService {
     private void insertOrder(Order order) {
         order.setStatus(DataStatus.PENDING.getStatus());
 
-        verify(() -> StringUtils.isBlank(order.getAddress()), "address不能为空!");
+        verify(() -> StringUtils.isBlank(order.getAddress()), "address 不能为空!");
         verify(() -> order.getTotalPrice() == null || order.getTotalPrice().compareTo(0L) < 0, "totalPrice非法!");
-        verify(() -> order.getUserId() == null, "address不能为空!");
+        verify(() -> order.getUserId() == null, "userId 不能为空!");
 
         order.setCreatedAt(new Date());
         order.setUpdatedAt(new Date());

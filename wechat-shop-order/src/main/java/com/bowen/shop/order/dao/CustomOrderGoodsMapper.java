@@ -9,4 +9,6 @@ public interface CustomOrderGoodsMapper {
     void batchInsert(List<OrderGoods> orderGoodsList);
 
     void updateOrder(Order order);
+
+    Order selectByPrimaryKey(Long id);
 }

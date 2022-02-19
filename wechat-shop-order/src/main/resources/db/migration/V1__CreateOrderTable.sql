@@ -1,4 +1,4 @@
-create table `ORDER`
+create table `ORDER_TABLE`
 (
     ID              BIGINT PRIMARY KEY AUTO_INCREMENT,
     USER_ID         BIGINT,

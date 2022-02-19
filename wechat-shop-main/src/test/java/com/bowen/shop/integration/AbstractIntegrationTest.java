@@ -44,7 +44,6 @@ public abstract class AbstractIntegrationTest {
         flyway.migrate();
     }
 
-
     public final ObjectMapper objectMapper = new ObjectMapper();
 
     private String getUrl(String apiName) {

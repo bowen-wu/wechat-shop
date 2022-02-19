@@ -31,6 +31,7 @@ public class RpcOrder extends Order implements Serializable {
         this.setExpressCompany(order.getExpressCompany());
         this.setCreatedAt(order.getCreatedAt());
         this.setTotalPrice(order.getTotalPrice());
+        this.setShopId(order.getShopId());
     }
 
     public List<GoodsIdAndNumber> getGoodsIdAndNumberList() {

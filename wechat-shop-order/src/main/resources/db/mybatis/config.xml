@@ -6,6 +6,9 @@
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
+    <typeAliases>
+        <typeAlias type="com.bowen.shop.api.generate.OrderGoods" alias="OrderGoods"/>
+    </typeAliases>
     <mappers>
         <mapper resource="db/mybatis/mapper/CustomOrderGoodsMapper.xml"/>
     </mappers>
