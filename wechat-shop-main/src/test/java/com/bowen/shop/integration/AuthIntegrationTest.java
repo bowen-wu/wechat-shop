@@ -81,7 +81,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
                     "/api/v1/login",
                     new TelAndCode(TelVerificationServiceTest.VALID_PARAMETER.getTel(), "000000"));
             try (CloseableHttpResponse response = httpclient.execute(login)) {
-                assertEquals(HTTP_MOVED_TEMP, response.getCode());
+                assertEquals(HTTP_OK, response.getCode());
             }
 
             // 3. check login user info = true

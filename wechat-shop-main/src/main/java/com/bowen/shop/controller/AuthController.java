@@ -106,16 +106,15 @@ public class AuthController {
             UsernamePasswordToken token = new UsernamePasswordToken(
                     telAndCode.getTel(),
                     telAndCode.getCode());
-            token.setRememberMe(true);
 
             try {
                 SecurityUtils.getSubject().login(token);
-                response.setStatus(HttpStatus.FOUND.value());
+                response.setStatus(HttpStatus.OK.value());
             } catch (IncorrectCredentialsException e) {
-                response.setStatus(HttpStatus.NOT_FOUND.value());
+                response.setStatus(HttpStatus.FORBIDDEN.value());
             }
         } else {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
         }
     }
 
