@@ -8,6 +8,12 @@ public class GoodsWithNumber extends Goods {
     public GoodsWithNumber() {
     }
 
+    public static GoodsWithNumber of(Goods goods, int number) {
+        GoodsWithNumber goodsWithNumber = new GoodsWithNumber(goods);
+        goodsWithNumber.setNumber(number);
+        return goodsWithNumber;
+    }
+
     public GoodsWithNumber(Goods goods) {
         this.setCreatedAt(goods.getCreatedAt());
         this.setDescription(goods.getDescription());

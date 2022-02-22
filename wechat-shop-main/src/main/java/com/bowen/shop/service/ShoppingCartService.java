@@ -8,16 +8,20 @@ import com.bowen.shop.api.entity.HttpException;
 import com.bowen.shop.api.entity.ResponseWithPages;
 import com.bowen.shop.entity.ShoppingCartData;
 import com.bowen.shop.generate.Goods;
+import com.bowen.shop.generate.GoodsExample;
 import com.bowen.shop.generate.GoodsMapper;
 import com.bowen.shop.generate.Shop;
 import com.bowen.shop.generate.ShopMapper;
 import com.bowen.shop.generate.ShoppingCart;
 import com.bowen.shop.generate.ShoppingCartExample;
 import com.bowen.shop.generate.ShoppingCartMapper;
+import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +29,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class ShoppingCartService {
@@ -48,13 +55,12 @@ public class ShoppingCartService {
     private GoodsIdAndNumber includeGoodsInList(ShoppingCart shoppingCartInDatabase, List<GoodsIdAndNumber> goodsIdAndNumberList) {
         List<GoodsIdAndNumber> goodsSingleList = goodsIdAndNumberList.stream()
                 .filter(item -> item.getId() == shoppingCartInDatabase.getGoodsId())
-                .map(item -> {
+                .peek(item -> {
                     if (item.getId() == shoppingCartInDatabase.getGoodsId()) {
                         item.setNumber(item.getNumber() + shoppingCartInDatabase.getNumber());
                     }
-                    return item;
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
         if (goodsSingleList.size() <= 0) {
             return null;
         }
@@ -77,44 +83,49 @@ public class ShoppingCartService {
         return shoppingCart;
     }
 
+    private Map<Long, Goods> getGoodsIdToGoodsMap(List<Long> goodsIdList) {
+        GoodsExample goodsExample = new GoodsExample();
+        goodsExample.createCriteria().andShopIdIn(goodsIdList);
+        List<Goods> goodsList = goodsMapper.selectByExample(goodsExample);
+        return goodsList.stream().collect(toMap(Goods::getId, goods -> goods));
+    }
+
     private Map<Long, List<GoodsWithNumber>> getShopIdMapGoodsWithNumberList(List<ShoppingCart> shoppingCartList) {
+        Map<Long, Goods> goodsIdToGoodsMap = getGoodsIdToGoodsMap(shoppingCartList.stream().map(ShoppingCart::getGoodsId).collect(toList()));
+
         // TODO: stream
         Map<Long, List<GoodsWithNumber>> shopWithGoodsListMap = new ConcurrentHashMap<>();
         for (ShoppingCart shoppingCart : shoppingCartList) {
             List<GoodsWithNumber> goodsWithNumberList = shopWithGoodsListMap.get(shoppingCart.getShopId());
             if (goodsWithNumberList == null) {
-                shopWithGoodsListMap.put(shoppingCart.getShopId(), Collections.singletonList(getGoodsWithNumberFromGoodsIdAndNumber(shoppingCart.getGoodsId(), shoppingCart.getNumber())));
+                shopWithGoodsListMap.put(shoppingCart.getShopId(), new ArrayList<>(Collections.singletonList(GoodsWithNumber.of(goodsIdToGoodsMap.get(shoppingCart.getGoodsId()), shoppingCart.getNumber()))));
             } else {
-                goodsWithNumberList.add(getGoodsWithNumberFromGoodsIdAndNumber(shoppingCart.getGoodsId(), shoppingCart.getNumber()));
+                goodsWithNumberList.add(GoodsWithNumber.of(goodsIdToGoodsMap.get(shoppingCart.getGoodsId()), shoppingCart.getNumber()));
                 shopWithGoodsListMap.put(shoppingCart.getShopId(), goodsWithNumberList);
             }
         }
         return shopWithGoodsListMap;
     }
 
-    public GoodsWithNumber getGoodsWithNumberFromGoodsIdAndNumber(Long goodsId, Integer number) {
-        Goods queryGoodsFromDatabase = goodsMapper.selectByPrimaryKey(goodsId);
-        if (queryGoodsFromDatabase == null || DataStatus.DELETED.getStatus().equals(queryGoodsFromDatabase.getStatus())) {
-            throw HttpException.notFound("商品未找到！goodsId：" + goodsId);
-        }
-
-        GoodsWithNumber goodsWithNumber = new GoodsWithNumber(queryGoodsFromDatabase);
-        goodsWithNumber.setNumber(number);
-        return goodsWithNumber;
-    }
-
-
     private ShoppingCart convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(GoodsIdAndNumber goodsIdAndNumber, long shopId, long userId) {
-        GoodsWithNumber goodsWithNumber = getGoodsWithNumberFromGoodsIdAndNumber(goodsIdAndNumber.getId(), goodsIdAndNumber.getNumber());
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsIdAndNumber.getId());
+        if (goods == null || DataStatus.DELETED.getStatus().equals(goods.getStatus())) {
+            throw HttpException.notFound("商品未找到！goodsId：" + goodsIdAndNumber.getId());
+        }
+        GoodsWithNumber goodsWithNumber = GoodsWithNumber.of(goods, goodsIdAndNumber.getNumber());
         return convertToShoppingCartFromGoodsWithNumber(goodsWithNumber, shopId, userId);
     }
 
     private List<GoodsWithNumber> getGoodsWithNumberListByShopIdAndUserId(long shopId, long userId) {
         ShoppingCartExample example = new ShoppingCartExample();
         example.createCriteria().andShopIdEqualTo(shopId).andUserIdEqualTo(userId).andStatusEqualTo(DataStatus.OK.getStatus());
-        return shoppingCartMapper.selectByExample(example).stream()
-                .map(shoppingCart -> getGoodsWithNumberFromGoodsIdAndNumber(shoppingCart.getGoodsId(), shoppingCart.getNumber()))
-                .collect(Collectors.toList());
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectByExample(example);
+        Map<Long, Goods> goodsIdToGoodsMap = getGoodsIdToGoodsMap(shoppingCartList.stream().map(ShoppingCart::getGoodsId).collect(toList()));
+        return shoppingCartList
+                .stream()
+                .map(shoppingCart -> GoodsWithNumber.of(goodsIdToGoodsMap.get(shoppingCart.getGoodsId()), shoppingCart.getNumber()))
+                .collect(toList());
+
     }
 
     private ShoppingCartData convertGoodsWithNumberListToShoppingCartResponse(List<GoodsWithNumber> goodsWithNumberList) {
@@ -153,7 +164,7 @@ public class ShoppingCartService {
      */
     public ShoppingCartData addGoodsListToShoppingCart(List<GoodsIdAndNumber> goodsIdAndNumberList, Long userId) {
         // 获取数据库已有的购物车商品
-        List<Long> goodsIdList = goodsIdAndNumberList.stream().distinct().map(GoodsIdAndNumber::getId).collect(Collectors.toList());
+        List<Long> goodsIdList = goodsIdAndNumberList.stream().distinct().map(GoodsIdAndNumber::getId).collect(toList());
         ShoppingCartExample goodsIdListExample = new ShoppingCartExample();
         goodsIdListExample.createCriteria().andGoodsIdIn(goodsIdList).andUserIdEqualTo(userId);
         List<ShoppingCart> goodsListOfShoppingCartOfAlreadyInDatabase = shoppingCartMapper.selectByExample(goodsIdListExample);
@@ -179,7 +190,7 @@ public class ShoppingCartService {
         List<ShoppingCart> shoppingCartListOfPendingInsert = goodsIdAndNumberList.stream()
                 .filter(goodsOfPendingInsertToDatabase -> isGoodsIdNotInList(goodsOfPendingInsertToDatabase.getId(), goodsListOfShoppingCartOfAlreadyInDatabase))
                 .map(goodsOfPendingInsertToDatabase -> convertToShoppingCartFromAddToShoppingCartGoodsAndShopIdAndUserId(goodsOfPendingInsertToDatabase, shop.getId(), userId))
-                .collect(Collectors.toList());
+                .collect(toList());
 
         // update
         for (ShoppingCart existGoods : goodsListOfShoppingCartOfAlreadyInDatabase) {
@@ -214,7 +225,7 @@ public class ShoppingCartService {
         Map<Long, List<GoodsWithNumber>> shopWithGoodsListMap = getShopIdMapGoodsWithNumberList(shoppingCartList);
         List<ShoppingCartData> shoppingCartResponseList = shopWithGoodsListMap.values().stream()
                 .map(this::convertGoodsWithNumberListToShoppingCartResponse)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         int total = customShoppingCartMapper.getTotal(userId);
         int totalPage = total % pageSize == 0 ? total / pageSize : total / pageSize + 1;

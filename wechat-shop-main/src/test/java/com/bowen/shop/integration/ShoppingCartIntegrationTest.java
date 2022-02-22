@@ -60,10 +60,10 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                 assertEquals(2, res.getTotalPage());
                 assertEquals(1, res.getData().size());
                 assertEquals(3, res.getData().get(0).getShop().getId());
-                assertEquals(1, res.getData().get(0).getGoodsWithNumberList().size());
-                assertEquals(5, res.getData().get(0).getGoodsWithNumberList().get(0).getId());
-                assertEquals(1, res.getData().get(0).getGoodsWithNumberList().get(0).getNumber());
-                assertEquals(3, res.getData().get(0).getGoodsWithNumberList().get(0).getShopId());
+                assertEquals(1, res.getData().get(0).getGoods().size());
+                assertEquals(5, res.getData().get(0).getGoods().get(0).getId());
+                assertEquals(1, res.getData().get(0).getGoods().get(0).getNumber());
+                assertEquals(3, res.getData().get(0).getGoods().get(0).getShopId());
             }
         }
     }
@@ -96,10 +96,10 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                         });
 
                 assertEquals(1, res.getData().getShop().getId());
-                assertEquals(1, res.getData().getGoodsWithNumberList().size());
-                assertEquals(2, res.getData().getGoodsWithNumberList().get(0).getId());
-                assertEquals(5, res.getData().getGoodsWithNumberList().get(0).getNumber());
-                assertEquals(1, res.getData().getGoodsWithNumberList().get(0).getShopId());
+                assertEquals(1, res.getData().getGoods().size());
+                assertEquals(2, res.getData().getGoods().get(0).getId());
+                assertEquals(5, res.getData().getGoods().get(0).getNumber());
+                assertEquals(1, res.getData().getGoods().get(0).getShopId());
             }
 
         }
@@ -157,10 +157,10 @@ public class ShoppingCartIntegrationTest extends AbstractIntegrationTest {
                         });
 
                 assertEquals(1, res.getData().getShop().getId());
-                assertEquals(2, res.getData().getGoodsWithNumberList().size());
+                assertEquals(2, res.getData().getGoods().size());
                 assertEquals(1, res.getData().getShop().getId());
-                assertEquals(Arrays.asList(1L, 2L), res.getData().getGoodsWithNumberList().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
-                assertEquals(Arrays.asList(9, 5), res.getData().getGoodsWithNumberList().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
+                assertEquals(Arrays.asList(1L, 2L), res.getData().getGoods().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
+                assertEquals(Arrays.asList(9, 5), res.getData().getGoods().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
             }
         }
     }

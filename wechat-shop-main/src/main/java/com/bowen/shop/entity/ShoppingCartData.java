@@ -8,7 +8,7 @@ import java.util.List;
 @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
 public class ShoppingCartData {
     private Shop shop;
-    private List<GoodsWithNumber> goodsWithNumberList;
+    private List<GoodsWithNumber> goods;
 
     public ShoppingCartData() {
     }
@@ -17,9 +17,9 @@ public class ShoppingCartData {
         return new ShoppingCartData(shop, goodsWithNumberList);
     }
 
-    private ShoppingCartData(Shop shop, List<GoodsWithNumber> goodsWithNumberList) {
+    private ShoppingCartData(Shop shop, List<GoodsWithNumber> goods) {
         this.shop = shop;
-        this.goodsWithNumberList = goodsWithNumberList;
+        this.goods = goods;
     }
 
     public Shop getShop() {
@@ -30,11 +30,11 @@ public class ShoppingCartData {
         this.shop = shop;
     }
 
-    public List<GoodsWithNumber> getGoodsWithNumberList() {
-        return goodsWithNumberList;
+    public List<GoodsWithNumber> getGoods() {
+        return goods;
     }
 
-    public void setGoodsWithNumberList(List<GoodsWithNumber> goodsWithNumberList) {
-        this.goodsWithNumberList = goodsWithNumberList;
+    public void setGoods(List<GoodsWithNumber> goods) {
+        this.goods = goods;
     }
 }

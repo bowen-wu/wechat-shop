@@ -73,9 +73,9 @@ class ShoppingCartServiceTest {
         ShoppingCartData shoppingCartData = shoppingCartService.deleteGoodsInShoppingCart(1, 1L);
         verify(customShoppingCartMapper).batchDelete(testShoppingCartList);
         assertEquals(testShop, shoppingCartData.getShop());
-        assertEquals(1, shoppingCartData.getGoodsWithNumberList().size());
-        assertEquals(testShopId, shoppingCartData.getGoodsWithNumberList().get(0).getShopId());
-        assertEquals(10, shoppingCartData.getGoodsWithNumberList().get(0).getNumber());
+        assertEquals(1, shoppingCartData.getGoods().size());
+        assertEquals(testShopId, shoppingCartData.getGoods().get(0).getShopId());
+        assertEquals(10, shoppingCartData.getGoods().get(0).getNumber());
     }
 
     @Test
@@ -168,9 +168,9 @@ class ShoppingCartServiceTest {
         // TODO: verify customShoppingCartMapper.batchInsert has been called
         verify(customShoppingCartMapper).batchUpdate(goodsListOfShoppingCartOfAlreadyInDatabase);
         assertEquals(testShopId, shoppingCartData.getShop().getId());
-        assertEquals(1, shoppingCartData.getGoodsWithNumberList().size());
-        assertEquals(Collections.singletonList(1L), shoppingCartData.getGoodsWithNumberList().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
-        assertEquals(Collections.singletonList(3), shoppingCartData.getGoodsWithNumberList().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
+        assertEquals(1, shoppingCartData.getGoods().size());
+        assertEquals(Collections.singletonList(1L), shoppingCartData.getGoods().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
+        assertEquals(Collections.singletonList(3), shoppingCartData.getGoods().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
     }
 
     @Test
@@ -202,7 +202,7 @@ class ShoppingCartServiceTest {
         assertEquals(3, goodsWithPageFromShoppingCart.getPageSize());
         assertEquals(3, goodsWithPageFromShoppingCart.getTotalPage());
         assertEquals(testShopId, goodsWithPageFromShoppingCart.getData().get(0).getShop().getId());
-        assertEquals(testShopId, goodsWithPageFromShoppingCart.getData().get(0).getGoodsWithNumberList().get(0).getShopId());
-        assertEquals(10, goodsWithPageFromShoppingCart.getData().get(0).getGoodsWithNumberList().get(0).getNumber());
+        assertEquals(testShopId, goodsWithPageFromShoppingCart.getData().get(0).getGoods().get(0).getShopId());
+        assertEquals(10, goodsWithPageFromShoppingCart.getData().get(0).getGoods().get(0).getNumber());
     }
 }
