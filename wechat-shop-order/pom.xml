@@ -55,6 +55,13 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.bowen.shop.order.OrderApplication</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.mybatis.generator</groupId>
                 <artifactId>mybatis-generator-maven-plugin</artifactId>
             </plugin>
@@ -118,7 +125,7 @@
                         <configuration>
                             <executable>sleep</executable>
                             <arguments>
-                                <argument>30</argument>
+                                <argument>40</argument>
                             </arguments>
                         </configuration>
                     </execution>

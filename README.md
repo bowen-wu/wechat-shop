@@ -116,3 +116,68 @@
    运行测试时会等待 5005 端口的调试器连接 => 新建 5005 端口的 remote debug => 运行的测试和 Maven 运行的环境完全一致
 7. **不要在循环中进行SQL查询**
 8. **不要在 ` stream ` 中使用 ` stream `**
+9. 启动服务时更改端口 => ` java -jar -Dserver.port=8088 <xxx.jar> `
+10. tmux 终端的多路复用器
+    1. ` tmux ` => 进入全新的终端
+    2. ` control + b ` 之后按 ` d ` 退出 tmux
+    3. ` tmux attach ` 返回 tmux 终端
+11. Linux（mac）解压缩文件
+    1. 压缩文件 => ` tar zcvf  [文件名.tar.gz]  [目标文件夹] `
+    2. 解压文件 => ` tar zxvf [文件名.tar.gz] `
+12. 文件上传下载
+    1. 下载命令 => ` scp username@serverIp:/path/filename ~/local_dir `
+    2. 上传命令 => ` scp /path/filename username@serverIp:/path `
+
+## 部署
+
+1. 启动 zookeeper => ` docker run --name zookeeper -p 2181:2181 -d zookeeper `
+2. 启动 Redis => ` docker run --name redis -p 6379:6379 -d redis `
+3. 启动 MySQL
+   ```
+   docker run --name wechat-shop-mysql -v /<path>/<to>/wechat-shop-mysql-data:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -e MYSQL_DATABASE=shop -d mysql:8
+   docker exec -it wechat-shop-mysql mysql -uroot -pmy-secret-pw -e 'create database if not exists `order`'
+   ```
+4. 将 jar 包安装到本地仓库 => ` ./mvnw install -DskipTests `
+5. 使用 Flyway 迁移数据库
+   ```
+   ./mvnw flyway:migrate -pl wechat-shop-main
+   ./mvnw flyway:migrate -pl wechat-shop-order
+   ```
+6. config NGINX
+   ```
+   events {}
+   http {
+      upstream app {
+         server 10.0.12.5:8081;
+         server 10.0.12.5:8082;
+      }
+
+      server {
+         listen 80;
+
+         location / {
+            root   /static;
+            autoindex on;
+         }
+
+         location /api {
+            proxy_pass http://app;
+         }
+      }
+   }
+   ```
+
+7. 启动 NGINX
+   => ` docker run --name nginx -v /<path>/<to>/nginx.conf:/etc/nginx/nginx.conf:ro -v /<path>/<to>/<static>/<file>:/static -p 5000:80 -d nginx `
+8. 启动服务
+   ```
+   # java -jar
+   java -jar 
+   
+   # nohup
+   java -jar xxx.jar nohup
+   
+   # docker
+   // docker build
+   docker build -f Dockerfile.main . -t wechat-shop-main 
+   ```
