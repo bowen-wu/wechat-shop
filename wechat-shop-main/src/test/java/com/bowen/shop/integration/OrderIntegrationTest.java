@@ -211,9 +211,9 @@ public class OrderIntegrationTest extends AbstractIntegrationTest {
     private void matchAllProperty(OrderResponse orderResponse) {
         assertEquals(1234L, orderResponse.getId());
         assertEquals(1, orderResponse.getShop().getId());
-        assertEquals(2, orderResponse.getGoodsList().size());
-        assertEquals(Arrays.asList(1L, 2L), orderResponse.getGoodsList().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
-        assertEquals(Arrays.asList(6, 7), orderResponse.getGoodsList().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
+        assertEquals(2, orderResponse.getGoods().size());
+        assertEquals(Arrays.asList(1L, 2L), orderResponse.getGoods().stream().map(GoodsWithNumber::getId).collect(Collectors.toList()));
+        assertEquals(Arrays.asList(6, 7), orderResponse.getGoods().stream().map(GoodsWithNumber::getNumber).collect(Collectors.toList()));
         assertEquals(16500, orderResponse.getTotalPrice());
     }
 

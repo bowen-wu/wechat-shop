@@ -9,7 +9,7 @@ import java.util.List;
 @SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "I prefer to suppress these FindBugs warnings")
 public class OrderResponse extends Order {
     private Shop shop;
-    private List<GoodsWithNumber> goodsList;
+    private List<GoodsWithNumber> goods;
 
     public OrderResponse() {
     }
@@ -34,11 +34,11 @@ public class OrderResponse extends Order {
         this.shop = shop;
     }
 
-    public List<GoodsWithNumber> getGoodsList() {
-        return goodsList;
+    public List<GoodsWithNumber> getGoods() {
+        return goods;
     }
 
-    public void setGoodsList(List<GoodsWithNumber> goodsList) {
-        this.goodsList = goodsList;
+    public void setGoods(List<GoodsWithNumber> goods) {
+        this.goods = goods;
     }
 }

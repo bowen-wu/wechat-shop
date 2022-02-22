@@ -88,7 +88,7 @@ public class OrderService {
         OrderResponse orderResponse = new OrderResponse(order);
 
         orderResponse.setShop(shopMapper.selectByPrimaryKey(new ArrayList<>(idToGoodsMap.values()).get(0).getShopId()));
-        orderResponse.setGoodsList(goodsIdAndNumberList.stream()
+        orderResponse.setGoods(goodsIdAndNumberList.stream()
                 .map(goodsIdAndNumber -> getGoodsWithNumber(idToGoodsMap, goodsIdAndNumber))
                 .collect(toList()));
         return orderResponse;
@@ -145,6 +145,7 @@ public class OrderService {
                 .map(RpcOrder::getGoodsIdAndNumberList)
                 .flatMap(Collection::stream)
                 .map(GoodsIdAndNumber::getId)
+                .distinct()
                 .collect(toList());
 
         Map<Long, Goods> idToGoodsMap = getIdToGoodsMap(goodsIdList);
