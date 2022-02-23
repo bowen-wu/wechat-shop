@@ -1,10 +1,10 @@
 package com.bowen.shop.service;
 
-import com.bowen.shop.dao.CustomShoppingCartMapper;
-import com.bowen.shop.api.entity.GoodsIdAndNumber;
 import com.bowen.shop.api.entity.DataStatus;
-import com.bowen.shop.entity.GoodsWithNumber;
+import com.bowen.shop.api.entity.GoodsIdAndNumber;
 import com.bowen.shop.api.entity.ResponseWithPages;
+import com.bowen.shop.dao.CustomShoppingCartMapper;
+import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.ShoppingCartData;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.generate.GoodsMapper;
@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ class ShoppingCartServiceTest {
 
         when(shoppingCartMapper.selectByExample(any())).thenReturn(testShoppingCartList);
         when(shopMapper.selectByPrimaryKey(testShopId)).thenReturn(testShop);
-        when(goodsMapper.selectByPrimaryKey(1L)).thenReturn(testGoods);
+        when(goodsMapper.selectByExample(any())).thenReturn(Collections.singletonList(testGoods));
 
         ShoppingCartData shoppingCartData = shoppingCartService.deleteGoodsInShoppingCart(1, 1L);
         verify(customShoppingCartMapper).batchDelete(testShoppingCartList);
@@ -155,7 +156,7 @@ class ShoppingCartServiceTest {
         Goods testGoods1 = new Goods();
         testGoods1.setId(1L);
         testGoods1.setStatus(DataStatus.OK.getStatus());
-        when(goodsMapper.selectByPrimaryKey(1L)).thenReturn(testGoods1);
+        when(goodsMapper.selectByExample(any())).thenReturn(Arrays.asList(testGoods1, testGoods2));
 
         List<GoodsIdAndNumber> testGoodsIdAndNumberList = new ArrayList<>();
         GoodsIdAndNumber goodsIdAndNumber1 = new GoodsIdAndNumber(2, 1L);
@@ -182,15 +183,16 @@ class ShoppingCartServiceTest {
         ShoppingCart testShoppingCart = new ShoppingCart();
         testShoppingCart.setShopId(testShopId);
         testShoppingCart.setNumber(10);
+        testShoppingCart.setGoodsId(3L);
         testShoppingCartList.add(testShoppingCart);
         List<Long> testShopIdList = Collections.singletonList(testShopId);
         Goods testGoods = new Goods();
-        testGoods.setId(1L);
+        testGoods.setId(3L);
         testGoods.setShopId(testShopId);
         testGoods.setStatus(DataStatus.OK.getStatus());
 
         when(shopMapper.selectByPrimaryKey(any())).thenReturn(testShop);
-        when(goodsMapper.selectByPrimaryKey(any())).thenReturn(testGoods);
+        when(goodsMapper.selectByExample(any())).thenReturn(Collections.singletonList(testGoods));
         when(shoppingCartMapper.selectByExample(any())).thenReturn(testShoppingCartList);
         when(customShoppingCartMapper.getTotal(1L)).thenReturn(8);
         when(customShoppingCartMapper.getShopListFromShoppingCartWithPage(1L, 0, 3)).thenReturn(testShopIdList);

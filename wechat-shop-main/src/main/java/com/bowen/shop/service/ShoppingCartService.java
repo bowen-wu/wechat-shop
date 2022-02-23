@@ -1,11 +1,11 @@
 package com.bowen.shop.service;
 
-import com.bowen.shop.dao.CustomShoppingCartMapper;
-import com.bowen.shop.api.entity.GoodsIdAndNumber;
 import com.bowen.shop.api.entity.DataStatus;
-import com.bowen.shop.entity.GoodsWithNumber;
+import com.bowen.shop.api.entity.GoodsIdAndNumber;
 import com.bowen.shop.api.entity.HttpException;
 import com.bowen.shop.api.entity.ResponseWithPages;
+import com.bowen.shop.dao.CustomShoppingCartMapper;
+import com.bowen.shop.entity.GoodsWithNumber;
 import com.bowen.shop.entity.ShoppingCartData;
 import com.bowen.shop.generate.Goods;
 import com.bowen.shop.generate.GoodsExample;
@@ -15,20 +15,17 @@ import com.bowen.shop.generate.ShopMapper;
 import com.bowen.shop.generate.ShoppingCart;
 import com.bowen.shop.generate.ShoppingCartExample;
 import com.bowen.shop.generate.ShoppingCartMapper;
-import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -85,7 +82,7 @@ public class ShoppingCartService {
 
     private Map<Long, Goods> getGoodsIdToGoodsMap(List<Long> goodsIdList) {
         GoodsExample goodsExample = new GoodsExample();
-        goodsExample.createCriteria().andShopIdIn(goodsIdList);
+        goodsExample.createCriteria().andIdIn(goodsIdList);
         List<Goods> goodsList = goodsMapper.selectByExample(goodsExample);
         return goodsList.stream().collect(toMap(Goods::getId, goods -> goods));
     }

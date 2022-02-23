@@ -53,7 +53,7 @@ public class ShiroConfig implements WebMvcConfigurer {
         //允许任何方法访问
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.setMaxAge(3600L);         // 预检请求的有效期，单位为秒。
-        corsConfiguration.setAllowCredentials(true);// 是否支持安全证书(必需参数)
+        corsConfiguration.setAllowCredentials(true); // 是否支持安全证书(必需参数)
         return corsConfiguration;
     }
 

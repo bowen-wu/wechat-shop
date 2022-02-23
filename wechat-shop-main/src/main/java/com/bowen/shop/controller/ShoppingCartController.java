@@ -246,12 +246,10 @@ public class ShoppingCartController {
      * 删除当前用户购物车中指定的商品
      *
      * @param goodsId  删除商品Id
-     * @param response response
      * @return 购物车物品
      */
     @DeleteMapping("/shoppingCart/{goodsId}")
-    public Response<ShoppingCartData> deleteGoodsInShoppingCart(@PathVariable("goodsId") long goodsId,
-                                                                HttpServletResponse response) {
+    public Response<ShoppingCartData> deleteGoodsInShoppingCart(@PathVariable("goodsId") long goodsId) {
         return Response.success(shoppingCartService.deleteGoodsInShoppingCart(goodsId, UserContext.getCurrentUser().getId()));
     }
 }
