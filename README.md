@@ -180,4 +180,8 @@
    # docker
    // docker build
    docker build -f Dockerfile.main . -t wechat-shop-main 
+   
+   # docker tag
+   docker tag <ContainerId> <Ip>:<Port>/<Name>:<Tag>
+   docker tag f131699e55f8 12.4.17.9:5000/wechat-shop-order:0.0.3 
    ```
