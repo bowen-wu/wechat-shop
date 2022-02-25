@@ -11,6 +11,7 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisManager;
+import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -107,20 +108,39 @@ public class ShiroConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public RedisCacheManager redisCacheManager() {
-        RedisCacheManager redisCacheManager = new RedisCacheManager();
+    public RedisManager redisManager() {
         RedisManager redisManager = new RedisManager();
         redisManager.setHost(redisHost + ":" + redisPort);
+        return redisManager;
+    }
+
+    @Bean
+    public RedisSessionDAO redisSessionDAO(RedisManager redisManager) {
+        RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
+        redisSessionDAO.setRedisManager(redisManager);
+        return redisSessionDAO;
+    }
+
+    @Bean
+    public DefaultWebSessionManager redisSessionManager(RedisSessionDAO redisSessionDAO) {
+        DefaultWebSessionManager defaultWebSessionManager = new DefaultWebSessionManager();
+        defaultWebSessionManager.setSessionDAO(redisSessionDAO);
+        return defaultWebSessionManager;
+    }
+
+    @Bean
+    public RedisCacheManager redisCacheManager(RedisManager redisManager) {
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager);
         return redisCacheManager;
     }
 
     @Bean
-    public SecurityManager securityManager(ShiroRealmService shiroRealmService, RedisCacheManager redisCacheManager) {
+    public SecurityManager securityManager(ShiroRealmService shiroRealmService, RedisCacheManager redisCacheManager, DefaultWebSessionManager redisSessionManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(shiroRealmService);
         securityManager.setCacheManager(redisCacheManager);
-        securityManager.setSessionManager(new DefaultWebSessionManager());
+        securityManager.setSessionManager(redisSessionManager);
         SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
     }
