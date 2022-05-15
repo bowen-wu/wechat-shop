@@ -175,7 +175,7 @@
    java -jar 
    
    # nohup
-   java -jar xxx.jar nohup
+   nohup java -jar xxx.jar &
    
    # docker
    // docker build
